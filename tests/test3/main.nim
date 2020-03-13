@@ -15,7 +15,7 @@ server.pages:
   regex(re"\A\/id(\d+)\z"):  # when url is re"domain/id\d+", try "domain/id123" and "domain/idNotNumber"
     await request.answer("Hello, user with ID" & url[0])  # url var contains array[20, string], matched from URL.
   notfound:  # `notfound` should be at the end of the remaining cases
-    await request.answer("<h1 align='center'>Sorry, but page not found :(</h1>")
+    await request.error("<h1 align='center'>Sorry, but page not found :(</h1>")  # `error` sends Http404 code.
 
 
 server.start()  # Starts server.
