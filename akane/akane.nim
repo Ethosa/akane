@@ -44,6 +44,10 @@ proc newServer*(address: string = "127.0.0.1",
 
 
 proc loadtemplate*(name: string): Future[string] {.async, inline.} =
+  ## Loads HTML template from `templates` folder.
+  ##
+  ## Arguments:
+  ## -   ``name`` - template's name, e.g. "index", "api", etc.
   var
     file = openAsync(("templates" / name) & ".html")
     readed = await file.readAll()
@@ -63,22 +67,16 @@ proc parseQuery*(request: Request): Future[JsonNode] {.async.} =
       result[decodeUrl(timed[0])] = %decodeUrl(timed[1])
 
 
-macro answer*(request, message: untyped): untyped =
-  ## Responds from server with utf-8.
-  result = newCall(
-    "respond",
-    request,
-    ident("Http200"),
-    newCall(
-      "&",
-      newLit("<head><meta charset='utf-8'></head>"),
-      message
-    )
-  )
-
-
 macro pages*(server: ServerRef, body: untyped): untyped =
   ## This macro provides convenient page adding.
+  ##
+  ## `body` should be StmtList.
+  ## page type can be:
+  ## -   ``equals``
+  ## -   ``startswith``
+  ## -   ``endswith``
+  ## -   ``regex``
+  ## -   ``notfound`` - this page uses without URL argument.
   ##
   ## ..code-block::Nim
   ##  server.pages:
@@ -88,8 +86,8 @@ macro pages*(server: ServerRef, body: untyped): untyped =
   var
     stmtlist = newStmtList()
     notfound_declaration = false
-  stmtlist.add(  # let urlParams: JsonNode = await parseQuery(request)
-    newNimNode(nnkLetSection).add(
+  stmtlist.add(
+    newNimNode(nnkLetSection).add(  # let urlParams: JsonNode = await parseQuery(request)
       newNimNode(nnkIdentDefs).add(
         ident("urlParams"),
         ident("JsonNode"),
@@ -102,7 +100,7 @@ macro pages*(server: ServerRef, body: untyped): untyped =
         )
       )
     ),
-    newNimNode(nnkLetSection).add(
+    newNimNode(nnkLetSection).add(  # let decode_url: string = decodeUrl(request.url.path)
       newNimNode(nnkIdentDefs).add(
         ident("decoded_url"),
         ident("string"),
@@ -143,7 +141,7 @@ macro pages*(server: ServerRef, body: untyped): untyped =
             newCall("==", path, ident("decoded_url")),
             slist))
       elif current == "startswith":
-        slist.insert(0,
+        slist.insert(0,  # let url = decoded_url[`path`.len..^1]
           newNimNode(nnkLetSection).add(
             newNimNode(nnkIdentDefs).add(
               ident("url"),
@@ -167,7 +165,7 @@ macro pages*(server: ServerRef, body: untyped): untyped =
               path),
             slist))
       elif current == "endswith":
-        slist.insert(0,
+        slist.insert(0,  # let url: string = decoded_url[0..^`path`.len]
           newNimNode(nnkLetSection).add(
             newNimNode(nnkIdentDefs).add(
               ident("url"),
@@ -192,12 +190,12 @@ macro pages*(server: ServerRef, body: untyped): untyped =
               path),
             slist))
       elif current == "regex":
-        slist.insert(0,
+        slist.insert(0,  # discard match(decoded_url, `path`, url)
             newNimNode(nnkDiscardStmt).add(
               newCall("match", ident("decoded_url"), path, ident("url"))
             )
           )
-        slist.insert(0,
+        slist.insert(0,  # var url: array[20, string]
           newNimNode(nnkVarSection).add(
             newNimNode(nnkIdentDefs).add(
               ident("url"),
@@ -223,7 +221,7 @@ macro pages*(server: ServerRef, body: untyped): untyped =
   if not notfound_declaration:
     stmtlist[2].add(
       newNimNode(nnkElse).add(
-        newCall(
+        newCall(  # await request.respond(Http404, "Not found")
           "await",
           newCall(
             "respond",
@@ -254,6 +252,40 @@ macro pages*(server: ServerRef, body: untyped): untyped =
     ),
     newEmptyNode(),
     stmtlist)
+
+
+macro answer*(request, message: untyped): untyped =
+  ## Responds from server with utf-8.
+  ##
+  ## Translates to:
+  ##   await request.respond(Http200, "<head><meta charset='utf-8'></head>" & message)
+  result = newCall(
+    "respond",
+    request,
+    ident("Http200"),
+    newCall(
+      "&",
+      newLit("<head><meta charset='utf-8'></head>"),
+      message
+    )
+  )
+
+
+macro error*(request, message: untyped): untyped =
+  ## Responds from server with utf-8.
+  ##
+  ## Translates to:
+  ##   await request.respond(Http404, "<head><meta charset='utf-8'></head>" & message)
+  result = newCall(
+    "respond",
+    request,
+    ident("Http404"),
+    newCall(
+      "&",
+      newLit("<head><meta charset='utf-8'></head>"),
+      message
+    )
+  )
 
 
 macro start*(server: ServerRef): untyped =
