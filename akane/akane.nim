@@ -21,10 +21,12 @@ export re
 
 type
   ServerRef* = ref object
-    debug*: bool
     port*: uint16
     address*: string
     server*: AsyncHttpServer
+
+
+var AKANE_DEBUG_MODE*: bool = false
 
 
 proc newServer*(address: string = "127.0.0.1",
@@ -37,9 +39,10 @@ proc newServer*(address: string = "127.0.0.1",
   ## -   ``debug`` - debug mode
   if not existsDir("templates"):
     createDir("templates")
+  AKANE_DEBUG_MODE = debug
   return ServerRef(
     address: address, port: port,
-    server: newAsyncHttpServer(), debug: debug
+    server: newAsyncHttpServer()
   )
 
 
@@ -53,6 +56,12 @@ proc loadtemplate*(name: string): Future[string] {.async, inline.} =
     readed = await file.readAll()
   file.close()
   return readed
+
+
+proc debugoutput*(text: string) {.async, inline.} =
+  ## output text, if server.debug is true.
+  if AKANE_DEBUG_MODE:
+    echo text
 
 
 proc parseQuery*(request: Request): Future[JsonNode] {.async.} =
@@ -114,6 +123,17 @@ macro pages*(server: ServerRef, body: untyped): untyped =
           )
         )
       )
+    ),
+    newCall(
+      "await",
+      newCall(
+        "debugoutput",
+        newCall(
+          "&",
+          newLit("new Request: "),
+          newCall("$", ident("request"))
+        )
+      )
     )
   )
   stmtlist.add(newNimNode(nnkIfStmt))
@@ -136,7 +156,7 @@ macro pages*(server: ServerRef, body: untyped): untyped =
               )
             )
           )
-        stmtlist[2].add(  # request.path.url == i[1]
+        stmtlist[3].add(  # request.path.url == i[1]
           newNimNode(nnkElifBranch).add(
             newCall("==", path, ident("decoded_url")),
             slist))
@@ -157,7 +177,7 @@ macro pages*(server: ServerRef, body: untyped): untyped =
             )
           )
         )
-        stmtlist[2].add(
+        stmtlist[3].add(
           newNimNode(nnkElifBranch).add(
             newCall(
               "startsWith",
@@ -182,7 +202,7 @@ macro pages*(server: ServerRef, body: untyped): untyped =
             )
           )
           )
-        stmtlist[2].add(
+        stmtlist[3].add(
           newNimNode(nnkElifBranch).add(
             newCall(
               "endsWith",
@@ -207,7 +227,7 @@ macro pages*(server: ServerRef, body: untyped): untyped =
               newEmptyNode()
             )
           ))
-        stmtlist[2].add(
+        stmtlist[3].add(
           newNimNode(nnkElifBranch).add(
             newCall(
               "match",
@@ -216,10 +236,10 @@ macro pages*(server: ServerRef, body: untyped): untyped =
             slist))
       elif current == "notfound":
         notfound_declaration = true
-        stmtlist[2].add(newNimNode(nnkElse).add(slist))
+        stmtlist[3].add(newNimNode(nnkElse).add(slist))
 
   if not notfound_declaration:
-    stmtlist[2].add(
+    stmtlist[3].add(
       newNimNode(nnkElse).add(
         newCall(  # await request.respond(Http404, "Not found")
           "await",
@@ -291,6 +311,6 @@ macro error*(request, message: untyped): untyped =
 macro start*(server: ServerRef): untyped =
   ## Starts server.
   result = quote do:
-    if `server`.debug:
+    if AKANE_DEBUG_MODE:
       echo "Server starts on http://", `server`.address, ":", `server`.port
     waitFor `server`.server.serve(Port(`server`.port), receivepages)

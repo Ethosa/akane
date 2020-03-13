@@ -2,7 +2,7 @@
 # equals, startswith, endswith, notfound and regex.
 import akane
 
-var server = newServer()
+var server = newServer(debug=true)
 
 
 server.pages:
