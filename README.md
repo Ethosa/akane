@@ -12,13 +12,29 @@
 # Install
 -   `git`: `nimble install https://github.com/Ethosa/akane.git`
 
+
 # Features
 -   Pages with URL handling methods: `equals`, `startswith`, `endswith`, `regex`,`notfound`.
 -   `templates` folder.
+-   Simple usage
+    ```nim
+    import akane
+
+    var server = newServer(debug=true)  # launch on http://localhost:5000
+
+    server.pages:
+      equal("/"):
+        # type of `request` is a Request.
+        await request.answer("Hello, world!")  # utf-8 encoded message.
+
+    server.start()
+    ```
+
 
 # FAQ
 *Q*: How I can help to develop this project?  
 *A*: You can put a :star: :3
+
 
 <div align="center">
   Copyright 2020 Ethosa
