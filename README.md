@@ -17,8 +17,8 @@
 -   `templates` folder.
 
 # FAQ
--   How I can help to develop this project?
-    You can put a :star: :3
+*Q*: How I can help to develop this project?  
+*A*: You can put a :star: :3
 
 <div align="center">
   Copyright 2020 Ethosa
