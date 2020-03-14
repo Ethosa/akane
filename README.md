@@ -22,14 +22,16 @@
     ```nim
     import akane
 
-    var server = newServer(debug=true)  # launch on http://localhost:5000
+    proc main =  # for gcsafe
+      var server = newServer(debug=true)  # launch on http://localhost:5000
 
-    server.pages:
-      equal("/"):
-        # type of `request` is a Request.
-        await request.answer("Hello, world!")  # utf-8 encoded message.
+      server.pages:
+        equal("/"):  # when url is "http://...localhost:5000/"
+          # type of `request` is a Request.
+          await request.answer("Hello, world!")  # utf-8 encoded message.
 
-    server.start()
+      server.start()
+    main()
     ```
 
 
