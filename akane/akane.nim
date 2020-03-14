@@ -49,7 +49,7 @@ proc newServer*(address: string = "127.0.0.1",
   )
 
 
-proc loadtemplate*(name: string): Future[string] {.async, inline.} =
+proc loadtemplate*(name: string, json: JsonNode = %*{}): Future[string] {.async, inline.} =
   ## Loads HTML template from `templates` folder.
   ##
   ## Arguments:
@@ -58,6 +58,8 @@ proc loadtemplate*(name: string): Future[string] {.async, inline.} =
     file = openAsync(("templates" / name) & ".html")
     readed = await file.readAll()
   file.close()
+  for key, value in json.pairs:
+    readed = readed.replacef(re("(\\$\\s*\\(" & $key & "\\))"), $value)
   return readed
 
 
@@ -81,8 +83,13 @@ proc parseQuery*(request: Request): Future[JsonNode] {.async.} =
       hour = if now.hour > 9: $now.hour else: "0" & $now.hour
       minute = if now.minute > 9: $now.minute else: "0" & $now.minute
       second = if now.second > 9: $now.second else: "0" & $now.second
+      host =
+        if request.headers.hasKey("host") and request.headers["host"].len > 1:
+          request.headers["host"] & " "
+        else:
+          "new "
     echo(
-      "new ", request.reqMethod,
+      host, request.reqMethod,
       " at ", now.year, ".", month, ".", day,
       " ", hour, ":", minute, ":", second,
       " Request from ", request.hostname,
@@ -255,9 +262,7 @@ macro pages*(server: ServerRef, body: untyped): untyped =
       )
 
   result = newNimNode(nnkProcDef).add(
-    newNimNode(nnkPostfix).add(
-      ident("*"), ident("receivepages")  # procedure name.
-    ),
+    ident("receivepages"),  # procedure name.
     newEmptyNode(),  # for template and macros
     newEmptyNode(),  # generics
     newNimNode(nnkFormalParams).add(  # proc params
