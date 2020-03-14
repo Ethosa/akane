@@ -6,6 +6,7 @@ import asynchttpserver
 # ----- SUPPORT ----- #
 import asyncfile  # loadtemplate
 import strutils  # startsWith, endsWith
+import tables
 import macros
 import times
 import json  # urlParams
@@ -59,6 +60,37 @@ proc loadtemplate*(name: string, json: JsonNode = %*{}): Future[string] {.async,
     readed = await file.readAll()
   file.close()
   for key, value in json.pairs:
+    # if statment
+    # e.g.: if $(variable) {......}
+    var if_statment = re("if\\s*(\\$\\(" & key & "\\))\\s*\\{\\s*([\\s\\S]+?)\\s*\\}")
+    if readed.contains(if_statment):
+      var canplace: bool = false
+      case value.kind:
+      of JBool:
+        if value.getBool:
+          canplace = true
+      of JInt:
+        if value.getInt != 0:
+          canplace = true
+      of JFloat:
+        if value.getFloat != 0.0:
+          canplace = true
+      of JString:
+        if value.getStr.len > 0:
+          canplace = true
+      of JArray:
+        if value.len > 0:
+          canplace = true
+      of JObject:
+        if value.getFields.len > 0:
+          canplace = true
+      else: discard
+      if canplace:
+        readed = readed.replacef(if_statment, "$2")
+      else:
+        readed = readed.replacef(if_statment, "")
+    # variable statment
+    # e.g.: $(variable)
     readed = readed.replacef(re("(\\$\\s*\\(" & $key & "\\))"), $value)
   return readed
 
