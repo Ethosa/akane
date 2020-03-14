@@ -2,20 +2,23 @@
 # ----- CORE ----- #
 import asyncdispatch
 import asynchttpserver
-export asyncdispatch
-export asynchttpserver
 
 # ----- SUPPORT ----- #
 import asyncfile  # loadtemplate
 import strutils  # startsWith, endsWith
-export strutils
 import macros
+import times
 import json  # urlParams
-export json
-import uri  # decodeUri
-export uri
+import uri  # decodeUrl
 import os
 import re  # regex
+
+# ----- EXPORT -----
+export asyncdispatch
+export asynchttpserver
+export strutils
+export json
+export uri
 export re
 
 
@@ -58,22 +61,32 @@ proc loadtemplate*(name: string): Future[string] {.async, inline.} =
   return readed
 
 
-proc debugoutput*(text: string) {.async, inline.} =
-  ## output text, if server.debug is true.
-  if AKANE_DEBUG_MODE:
-    echo text
-
-
 proc parseQuery*(request: Request): Future[JsonNode] {.async.} =
   ## Decodes query.
   ## e.g.:
   ##   "a=5&b=10" -> {"a": "5", "b": "10"}
+  ##
+  ## This also have debug output, if AKANE_DEBUG_MODE is true.
   var data = request.url.query.split("&")
   result = %*{}
   for i in data:
     var timed = i.split("=")
     if timed.len > 1:
       result[decodeUrl(timed[0])] = %decodeUrl(timed[1])
+  if AKANE_DEBUG_MODE:
+    let
+      now = times.local(times.getTime())
+      month = if ord(now.month) > 9: $ord(now.month) else: "0" & $ord(now.month)
+      day = if now.monthday > 9: $now.monthday else: "0" & $now.monthday
+      hour = if now.hour > 9: $now.hour else: "0" & $now.hour
+      minute = if now.minute > 9: $now.minute else: "0" & $now.minute
+      second = if now.second > 9: $now.second else: "0" & $now.second
+    echo(
+      "new ", request.reqMethod,
+      " at ", now.year, ".", month, ".", day,
+      " ", hour, ":", minute, ":", second,
+      " Request from ", request.hostname,
+      " to url \"", decodeUrl(request.url.path), "\".")
 
 
 macro pages*(server: ServerRef, body: untyped): untyped =
@@ -123,17 +136,6 @@ macro pages*(server: ServerRef, body: untyped): untyped =
           )
         )
       )
-    ),
-    newCall(
-      "await",
-      newCall(
-        "debugoutput",
-        newCall(
-          "&",
-          newLit("new Request: "),
-          newCall("$", ident("request"))
-        )
-      )
     )
   )
   stmtlist.add(newNimNode(nnkIfStmt))
@@ -147,7 +149,7 @@ macro pages*(server: ServerRef, body: untyped): untyped =
         (path.kind == nnkStrLit or path.kind == nnkCallStrLit or path.kind == nnkEmpty) and
         slist.kind == nnkStmtList):
       if current == "equals":
-        slist.insert(0,
+        slist.insert(0,  # let url: string = `path`
             newNimNode(nnkLetSection).add(
               newNimNode(nnkIdentDefs).add(
                 ident("url"),
@@ -156,7 +158,7 @@ macro pages*(server: ServerRef, body: untyped): untyped =
               )
             )
           )
-        stmtlist[3].add(  # request.path.url == i[1]
+        stmtlist[2].add(  # request.path.url == i[1]
           newNimNode(nnkElifBranch).add(
             newCall("==", path, ident("decoded_url")),
             slist))
@@ -177,7 +179,7 @@ macro pages*(server: ServerRef, body: untyped): untyped =
             )
           )
         )
-        stmtlist[3].add(
+        stmtlist[2].add(  # decode_url.startsWith(`path`)
           newNimNode(nnkElifBranch).add(
             newCall(
               "startsWith",
@@ -202,7 +204,7 @@ macro pages*(server: ServerRef, body: untyped): untyped =
             )
           )
           )
-        stmtlist[3].add(
+        stmtlist[2].add(  # decode_url.endsWith(`path`)
           newNimNode(nnkElifBranch).add(
             newCall(
               "endsWith",
@@ -227,7 +229,7 @@ macro pages*(server: ServerRef, body: untyped): untyped =
               newEmptyNode()
             )
           ))
-        stmtlist[3].add(
+        stmtlist[2].add(  # decode_url.match(`path`)
           newNimNode(nnkElifBranch).add(
             newCall(
               "match",
@@ -236,10 +238,10 @@ macro pages*(server: ServerRef, body: untyped): untyped =
             slist))
       elif current == "notfound":
         notfound_declaration = true
-        stmtlist[3].add(newNimNode(nnkElse).add(slist))
+        stmtlist[2].add(newNimNode(nnkElse).add(slist))
 
   if not notfound_declaration:
-    stmtlist[3].add(
+    stmtlist[2].add(
       newNimNode(nnkElse).add(
         newCall(  # await request.respond(Http404, "Not found")
           "await",

@@ -5,7 +5,7 @@
 [![Nim language-plastic](https://github.com/Ethosa/yukiko/blob/master/nim-lang.svg)](https://github.com/Ethosa/yukiko/blob/master/nim-lang.svg)
 [![License](https://img.shields.io/github/license/Ethosa/akane)](https://github.com/Ethosa/akane/blob/master/LICENSE)
 
-<h4>Latest version - 0.0.2</h4>
+<h4>Latest version - 0.0.3</h4>
 <h4>Stable version - ?</h4>
 </div>
 
@@ -16,6 +16,8 @@
 # Features
 -   Pages with URL handling methods: `equals`, `startswith`, `endswith`, `regex`,`notfound`.
 -   `templates` folder.
+-   Only the standard library used.
+-   Debug mode.
 -   Simple usage
     ```nim
     import akane
