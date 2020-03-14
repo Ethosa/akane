@@ -60,10 +60,12 @@ proc loadtemplate*(name: string, json: JsonNode = %*{}): Future[string] {.async,
     readed = await file.readAll()
   file.close()
   for key, value in json.pairs:
-    # if statment
-    # e.g.: if $(variable) {......}
-    var if_statment = re("if\\s*(\\$\\(" & key & "\\))\\s*\\{\\s*([\\s\\S]+?)\\s*\\}")
-    if readed.contains(if_statment):
+    let
+      # if statment, e.g.: if $(variable) {......}
+      if_stmt = re("if\\s*(\\$\\(" & key & "\\))\\s*\\{\\s*([\\s\\S]+?)\\s*\\}")
+      # variable statment, e.g.: $(variable)
+      variable_stmt = re("(\\$\\s*\\(" & key & "\\))")
+    if readed.contains(if_stmt):
       var canplace: bool = false
       case value.kind:
       of JBool:
@@ -86,12 +88,10 @@ proc loadtemplate*(name: string, json: JsonNode = %*{}): Future[string] {.async,
           canplace = true
       else: discard
       if canplace:
-        readed = readed.replacef(if_statment, "$2")
+        readed = readed.replacef(if_stmt, "$2")
       else:
-        readed = readed.replacef(if_statment, "")
-    # variable statment
-    # e.g.: $(variable)
-    readed = readed.replacef(re("(\\$\\s*\\(" & $key & "\\))"), $value)
+        readed = readed.replacef(if_stmt, "")
+    readed = readed.replacef(variable_stmt, $value)
   return readed
 
 
@@ -104,13 +104,14 @@ proc parseQuery*(request: Request): Future[JsonNode] {.async.} =
   var data = request.url.query.split("&")
   result = %*{}
   for i in data:
-    var timed = i.split("=")
+    let timed = i.split("=")
     if timed.len > 1:
       result[decodeUrl(timed[0])] = %decodeUrl(timed[1])
   if AKANE_DEBUG_MODE:
     let
       now = times.local(times.getTime())
-      month = if ord(now.month) > 9: $ord(now.month) else: "0" & $ord(now.month)
+      timed_month = ord(now.month)
+      month = if timed_month > 9: $timed_month else: "0" & $timed_month
       day = if now.monthday > 9: $now.monthday else: "0" & $now.monthday
       hour = if now.hour > 9: $now.hour else: "0" & $now.hour
       minute = if now.minute > 9: $now.minute else: "0" & $now.minute
@@ -178,6 +179,7 @@ macro pages*(server: ServerRef, body: untyped): untyped =
     )
   )
   stmtlist.add(newNimNode(nnkIfStmt))
+  var ifstmtlist = stmtlist[2]
 
   for i in body:  # for each page in statment list.
     let
@@ -197,7 +199,7 @@ macro pages*(server: ServerRef, body: untyped): untyped =
               )
             )
           )
-        stmtlist[2].add(  # request.path.url == i[1]
+        ifstmtlist.add(  # request.path.url == i[1]
           newNimNode(nnkElifBranch).add(
             newCall("==", path, ident("decoded_url")),
             slist))
@@ -218,7 +220,7 @@ macro pages*(server: ServerRef, body: untyped): untyped =
             )
           )
         )
-        stmtlist[2].add(  # decode_url.startsWith(`path`)
+        ifstmtlist.add(  # decode_url.startsWith(`path`)
           newNimNode(nnkElifBranch).add(
             newCall(
               "startsWith",
@@ -243,7 +245,7 @@ macro pages*(server: ServerRef, body: untyped): untyped =
             )
           )
           )
-        stmtlist[2].add(  # decode_url.endsWith(`path`)
+        ifstmtlist.add(  # decode_url.endsWith(`path`)
           newNimNode(nnkElifBranch).add(
             newCall(
               "endsWith",
@@ -261,26 +263,21 @@ macro pages*(server: ServerRef, body: untyped): untyped =
             newNimNode(nnkIdentDefs).add(
               ident("url"),
               newNimNode(nnkBracketExpr).add(
-                ident("array"),
-                newLit(20),
-                ident("string")
+                ident("array"), newLit(20), ident("string")
               ),
               newEmptyNode()
             )
           ))
-        stmtlist[2].add(  # decode_url.match(`path`)
+        ifstmtlist.add(  # decode_url.match(`path`)
           newNimNode(nnkElifBranch).add(
-            newCall(
-              "match",
-              ident("decoded_url"),
-              path),
+            newCall("match", ident("decoded_url"), path),
             slist))
       elif current == "notfound":
         notfound_declaration = true
-        stmtlist[2].add(newNimNode(nnkElse).add(slist))
+        ifstmtlist.add(newNimNode(nnkElse).add(slist))
 
   if not notfound_declaration:
-    stmtlist[2].add(
+    ifstmtlist.add(
       newNimNode(nnkElse).add(
         newCall(  # await request.respond(Http404, "Not found")
           "await",
@@ -313,7 +310,7 @@ macro pages*(server: ServerRef, body: untyped): untyped =
     stmtlist)
 
 
-macro answer*(request, message: untyped): untyped =
+macro answer*(request, message: untyped, http_code = Http200): untyped =
   ## Responds from server with utf-8.
   ##
   ## Translates to:
@@ -321,16 +318,12 @@ macro answer*(request, message: untyped): untyped =
   result = newCall(
     "respond",
     request,
-    ident("Http200"),
-    newCall(
-      "&",
-      newLit("<head><meta charset='utf-8'></head>"),
-      message
-    )
+    http_code,
+    newCall("&", newLit("<head><meta charset='utf-8'></head>"), message)
   )
 
 
-macro error*(request, message: untyped): untyped =
+macro error*(request, message: untyped, http_code = Http404): untyped =
   ## Responds from server with utf-8.
   ##
   ## Translates to:
@@ -338,12 +331,8 @@ macro error*(request, message: untyped): untyped =
   result = newCall(
     "respond",
     request,
-    ident("Http404"),
-    newCall(
-      "&",
-      newLit("<head><meta charset='utf-8'></head>"),
-      message
-    )
+    http_code,
+    newCall("&", newLit("<head><meta charset='utf-8'></head>"), message)
   )
 
 
