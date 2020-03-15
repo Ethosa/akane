@@ -5,7 +5,7 @@
 [![Nim language-plastic](https://github.com/Ethosa/yukiko/blob/master/nim-lang.svg)](https://github.com/Ethosa/yukiko/blob/master/nim-lang.svg)
 [![License](https://img.shields.io/github/license/Ethosa/akane)](https://github.com/Ethosa/akane/blob/master/LICENSE)
 
-<h4>Latest version - 0.0.4</h4>
+<h4>Latest version - 0.0.5</h4>
 <h4>Stable version - ?</h4>
 </div>
 
