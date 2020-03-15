@@ -30,7 +30,7 @@ type
     server*: AsyncHttpServer
 
 
-var AKANE_DEBUG_MODE*: bool = false
+var AKANE_DEBUG_MODE*: bool = false  ## change it with `newServer proc<#newServer,string,uint16,bool>`_
 
 
 proc newServer*(address: string = "127.0.0.1",
@@ -55,6 +55,7 @@ proc loadtemplate*(name: string, json: JsonNode = %*{}): Future[string] {.async,
   ##
   ## Arguments:
   ## -   ``name`` - template's name, e.g. "index", "api", etc.
+  ## -   ``json`` - Json data, which replaces in the template.
   var
     file = openAsync(("templates" / name) & ".html")
     readed = await file.readAll()
