@@ -39,6 +39,9 @@
 *Q*: Where I can learn this?  
 *A*: You can see [wiki page](https://github.com/Ethosa/akane/wiki/Getting-started)
 
+*Q*: Where I can find the docs?  
+*A*: You can see [docs page](https://ethosa.github.io/akane/akane/akane.html)
+
 *Q*: How I can help to develop this project?  
 *A*: You can put a :star: :3
 
