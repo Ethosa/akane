@@ -5,7 +5,7 @@
 [![Nim language-plastic](https://github.com/Ethosa/yukiko/blob/master/nim-lang.svg)](https://github.com/Ethosa/yukiko/blob/master/nim-lang.svg)
 [![License](https://img.shields.io/github/license/Ethosa/akane)](https://github.com/Ethosa/akane/blob/master/LICENSE)
 
-<h4>Latest version - 0.0.5</h4>
+<h4>Latest version - 0.0.6</h4>
 <h4>Stable version - ?</h4>
 </div>
 
@@ -19,6 +19,7 @@
 -   `templates` folder.
 -   Only the standard library used.
 -   Debug mode.
+-   Password hashing.
 -   Simple usage
     ```nim
     import akane
@@ -28,6 +29,7 @@
 
       server.pages:
         equals("/"):  # when url is "http://...localhost:5000/"
+          # You also can write "/" instead of equals("/")
           # type of `request` is a Request.
           await request.answer("Hello, world!")  # utf-8 encoded message.
 
