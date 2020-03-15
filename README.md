@@ -10,7 +10,8 @@
 </div>
 
 # Install
--   `git`: `nimble install https://github.com/Ethosa/akane.git`
+-   git: `nimble install https://github.com/Ethosa/akane.git`
+-   nimble: `nimble install akane`
 
 
 # Features
