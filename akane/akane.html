@@ -852,6 +852,10 @@ function main() {
     title="loadtemplate(name: string; json: JsonNode = %*{}): Future[string]"><wbr />loadtemplate<span class="attachedType"></span></a></li>
   <li><a class="reference" href="#parseQuery%2CRequest"
     title="parseQuery(request: Request): Future[JsonNode]"><wbr />parse<wbr />Query<span class="attachedType"></span></a></li>
+  <li><a class="reference" href="#password2hash%2Cstring"
+    title="password2hash(password: string): Future[string]"><wbr />password2hash<span class="attachedType"></span></a></li>
+  <li><a class="reference" href="#validatePassword%2Cstring%2Cstring"
+    title="validatePassword(password, hashpassword: string): Future[bool]"><wbr />validate<wbr />Password<span class="attachedType"></span></a></li>
 
   </ul>
 </li>
@@ -864,6 +868,8 @@ function main() {
     title="answer(request, message: untyped; http_code = Http200): untyped"><wbr />answer<span class="attachedType"></span></a></li>
   <li><a class="reference" href="#error.m%2Cuntyped%2Cuntyped"
     title="error(request, message: untyped; http_code = Http404): untyped"><wbr />error<span class="attachedType"></span></a></li>
+  <li><a class="reference" href="#sendJson.m%2Cuntyped%2Cuntyped"
+    title="sendJson(request, message: untyped; http_code = Http200): untyped"><wbr />send<wbr />Json<span class="attachedType"></span></a></li>
   <li><a class="reference" href="#start.m%2CServerRef"
     title="start(server: ServerRef): untyped"><wbr />start<span class="attachedType">ServerRef</span></a></li>
 
@@ -951,6 +957,31 @@ Decodes query.<dl class="docutils"><dt>e.g.:</dt>
 
 
 </dd>
+<a id="password2hash,string"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#password2hash%2Cstring"><span class="Identifier">password2hash</span></a><span class="Other">(</span><span class="Identifier">password</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">Future</span><span class="Other">[</span><span class="Identifier">string</span><span class="Other">]</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">inline</span><span class="Other">,</span>
+    <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">FutureError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dd>
+
+<p>Generates a sha1 from <tt class="docutils literal"><span class="pre">password</span></tt>.</p>
+<p>Arguments:</p>
+<ul class="simple"><li><tt class="docutils literal"><span class="pre">password</span></tt> - user password.</li>
+</ul>
+
+
+</dd>
+<a id="validatePassword,string,string"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#validatePassword%2Cstring%2Cstring"><span class="Identifier">validatePassword</span></a><span class="Other">(</span><span class="Identifier">password</span><span class="Other">,</span> <span class="Identifier">hashpassword</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">Future</span><span class="Other">[</span><span class="Identifier">bool</span><span class="Other">]</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">inline</span><span class="Other">,</span>
+    <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">FutureError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dd>
+
+<p>Validates the password and returns true, if the password is valid.</p>
+<p>Arguments:</p>
+<ul class="simple"><li><tt class="docutils literal"><span class="pre">password</span></tt> - got password from user input.</li>
+<li><tt class="docutils literal"><span class="pre">hashpassword</span></tt> - response from <a class="reference external" href="#password2hash,string">password2hash proc</a></li>
+</ul>
+
+
+</dd>
 
 </dl></div>
 <div class="section" id="17">
@@ -968,13 +999,23 @@ Decodes query.<dl class="docutils"><dt>e.g.:</dt>
 <li><tt class="docutils literal"><span class="pre">regex</span></tt></li>
 <li><tt class="docutils literal"><span class="pre">notfound</span></tt> - this page uses without URL argument.</li>
 </ul>
-<blockquote><p><dl class="docutils"><dt>server.pages:</dt>
+<dl class="docutils"><dt>You can also not write <tt class="docutils literal"><span class="pre">equals(&quot;/&quot;)</span></tt>:</dt>
+<dd><dl class="docutils"><dt>server.pages:</dt>
+<dd><dl class="docutils"><dt>&quot;/helloworld&quot;:</dt>
+<dd>...</dd>
+</dl>
+</dd>
+</dl>
+</dd>
+<dt>..code-block::Nim</dt>
+<dd><dl class="docutils"><dt>server.pages:</dt>
 <dd><dl class="docutils"><dt>equals(&quot;/home&quot;):</dt>
 <dd>echo url echo urlParams</dd>
 </dl>
 </dd>
 </dl>
-</p></blockquote>
+</dd>
+</dl>
 
 
 </dd>
@@ -983,7 +1024,7 @@ Decodes query.<dl class="docutils"><dt>e.g.:</dt>
 <dd>
 
 Responds from server with utf-8.<dl class="docutils"><dt>Translates to:</dt>
-<dd>await request.respond(Http200, &quot;&lt;head&gt;&lt;meta charset='utf-8'&gt;&lt;/head&gt;&quot; &amp; message)</dd>
+<dd>request.respond(Http200, &quot;&lt;head&gt;&lt;meta charset='utf-8'&gt;&lt;/head&gt;&quot; &amp; message)</dd>
 </dl>
 
 
@@ -993,7 +1034,20 @@ Responds from server with utf-8.<dl class="docutils"><dt>Translates to:</dt>
 <dd>
 
 Responds from server with utf-8.<dl class="docutils"><dt>Translates to:</dt>
-<dd>await request.respond(Http404, &quot;&lt;head&gt;&lt;meta charset='utf-8'&gt;&lt;/head&gt;&quot; &amp; message)</dd>
+<dd>request.respond(Http404, &quot;&lt;head&gt;&lt;meta charset='utf-8'&gt;&lt;/head&gt;&quot; &amp; message)</dd>
+</dl>
+
+
+</dd>
+<a id="sendJson.m,untyped,untyped"></a>
+<dt><pre><span class="Keyword">macro</span> <a href="#sendJson.m%2Cuntyped%2Cuntyped"><span class="Identifier">sendJson</span></a><span class="Other">(</span><span class="Identifier">request</span><span class="Other">,</span> <span class="Identifier">message</span><span class="Other">:</span> <span class="Identifier">untyped</span><span class="Other">;</span> <span class="Identifier">http_code</span> <span class="Other">=</span> <span class="Identifier">Http200</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">untyped</span></pre></dt>
+<dd>
+
+Sends JsonNode with &quot;Content-Type&quot;: &quot;application/json&quot; in headers.<dl class="docutils"><dt>Translates to:</dt>
+<dd><dl class="docutils"><dt>request.respond(</dt>
+<dd>Http200, $message, newHttpHeaders([(&quot;Content-Type&quot;,&quot;application/json&quot;)]))</dd>
+</dl>
+</dd>
 </dl>
 
 
@@ -1015,7 +1069,7 @@ Starts server.
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small>Made with Nim. Generated: 2020-03-15 03:39:34 UTC</small>
+        <small>Made with Nim. Generated: 2020-03-15 17:21:21 UTC</small>
       </div>
     </div>
   </div>
