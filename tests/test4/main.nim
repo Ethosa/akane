@@ -8,7 +8,8 @@ proc main =  # main proc for gcsafe
     server = newServer(debug=true)
     data: JsonNode = %{
       "myvariable": %0,
-      "can_place": %false
+      "can_place": %false,
+      "test": %2
     }
 
   server.pages:

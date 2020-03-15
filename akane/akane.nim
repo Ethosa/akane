@@ -56,42 +56,58 @@ proc loadtemplate*(name: string, json: JsonNode = %*{}): Future[string] {.async,
   ## Arguments:
   ## -   ``name`` - template's name, e.g. "index", "api", etc.
   ## -   ``json`` - Json data, which replaces in the template.
+  ##
+  ## Replaces:
+  ## -  $(key) -> value
+  ## -  if $(key) { ... } -> ... (if value is true)
   var
     file = openAsync(("templates" / name) & ".html")
     readed = await file.readAll()
   file.close()
   for key, value in json.pairs:
+    # ---- regex patterns ---- #
     let
-      # if statment, e.g.: if $(variable) {......}
-      if_stmt = re("if\\s*(\\$\\(" & key & "\\))\\s*\\{\\s*([\\s\\S]+?)\\s*\\}")
       # variable statment, e.g.: $(variable)
       variable_stmt = re("(\\$\\s*\\(" & key & "\\))")
+      # if statment, e.g.: if $(variable) {......}
+      if_stmt = re("if\\s*(\\$\\s*\\(" & key & "\\))\\s*\\{\\s*([\\s\\S]+?)\\s*\\}")
+      # if not statment, e.g.: if not $(variable) {......}
+      if_notstmt = re("if\\s*not\\s*(\\$\\s*\\(" & key & "\\))\\s*\\{\\s*([\\s\\S]+?)\\s*\\}")
+
+    # ---- converts value to bool ---- #
+    var value_bool = false
+    case value.kind:
+    of JBool:
+      if value.getBool:
+        value_bool = true
+    of JInt:
+      if value.getInt != 0:
+        value_bool = true
+    of JFloat:
+      if value.getFloat != 0.0:
+        value_bool = true
+    of JString:
+      if value.getStr.len > 0:
+        value_bool = true
+    of JArray:
+      if value.len > 0:
+        value_bool = true
+    of JObject:
+      if value.getFields.len > 0:
+        value_bool = true
+    else: discard
+
+    # ---- replace ----- #
     if readed.contains(if_stmt):
-      var canplace: bool = false
-      case value.kind:
-      of JBool:
-        if value.getBool:
-          canplace = true
-      of JInt:
-        if value.getInt != 0:
-          canplace = true
-      of JFloat:
-        if value.getFloat != 0.0:
-          canplace = true
-      of JString:
-        if value.getStr.len > 0:
-          canplace = true
-      of JArray:
-        if value.len > 0:
-          canplace = true
-      of JObject:
-        if value.getFields.len > 0:
-          canplace = true
-      else: discard
-      if canplace:
+      if value_bool:
         readed = readed.replacef(if_stmt, "$2")
       else:
         readed = readed.replacef(if_stmt, "")
+    if readed.contains(if_notstmt):
+      if value_bool:
+        readed = readed.replacef(if_notstmt, "")
+      else:
+        readed = readed.replacef(if_notstmt, "$2")
     readed = readed.replacef(variable_stmt, $value)
   return readed
 
