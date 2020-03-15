@@ -11,6 +11,7 @@ import macros
 import times
 import json  # urlParams
 import uri  # decodeUrl
+import std/sha1  # sha1 passwords.
 import os
 import re  # regex
 
@@ -146,6 +147,23 @@ proc parseQuery*(request: Request): Future[JsonNode] {.async.} =
       " to url \"", decodeUrl(request.url.path), "\".")
 
 
+proc password2hash*(password: string): Future[string] {.async, inline.} =
+  ## Generates a sha1 from `password`.
+  ##
+  ## Arguments:
+  ## -   ``password`` - user password.
+  return $secureHash(password)
+
+
+proc validatePassword*(password, hashpassword: string): Future[bool] {.async, inline.} =
+  ## Validates the password and returns true, if the password is valid.
+  ##
+  ## Arguments:
+  ## -   ``password`` - got password from user input.
+  ## -   ``hashpassword`` - response from `password2hash proc <#password2hash,string>`_
+  return secureHash(password) == parseSecureHash(hashpassword)
+
+
 macro pages*(server: ServerRef, body: untyped): untyped =
   ## This macro provides convenient page adding.
   ##
@@ -156,6 +174,11 @@ macro pages*(server: ServerRef, body: untyped): untyped =
   ## -   ``endswith``
   ## -   ``regex``
   ## -   ``notfound`` - this page uses without URL argument.
+  ##
+  ## You can also not write `equals("/")`:
+  ##   server.pages:
+  ##     "/helloworld":
+  ##       ...
   ##
   ## ..code-block::Nim
   ##  server.pages:
@@ -200,10 +223,10 @@ macro pages*(server: ServerRef, body: untyped): untyped =
 
   for i in body:  # for each page in statment list.
     let
-      current = $i[0]
-      path = if i.len == 3: i[1] else: newEmptyNode()
+      current = if i.len == 3: $i[0] else: "equals"
+      path = if i.len == 3: i[1] else: i[0]
       slist = if i.len == 3: i[2] else: i[1]
-    if (i.kind == nnkCall and i[0].kind == nnkIdent and
+    if (i.kind == nnkCall and
         (path.kind == nnkStrLit or path.kind == nnkCallStrLit or path.kind == nnkEmpty) and
         slist.kind == nnkStmtList):
       if current == "equals":
@@ -216,7 +239,7 @@ macro pages*(server: ServerRef, body: untyped): untyped =
               )
             )
           )
-        ifstmtlist.add(  # request.path.url == i[1]
+        ifstmtlist.add(  # decoded_url == `path`
           newNimNode(nnkElifBranch).add(
             newCall("==", path, ident("decoded_url")),
             slist))
@@ -331,7 +354,7 @@ macro answer*(request, message: untyped, http_code = Http200): untyped =
   ## Responds from server with utf-8.
   ##
   ## Translates to:
-  ##   await request.respond(Http200, "<head><meta charset='utf-8'></head>" & message)
+  ##   request.respond(Http200, "<head><meta charset='utf-8'></head>" & message)
   result = newCall(
     "respond",
     request,
@@ -344,7 +367,7 @@ macro error*(request, message: untyped, http_code = Http404): untyped =
   ## Responds from server with utf-8.
   ##
   ## Translates to:
-  ##   await request.respond(Http404, "<head><meta charset='utf-8'></head>" & message)
+  ##   request.respond(Http404, "<head><meta charset='utf-8'></head>" & message)
   result = newCall(
     "respond",
     request,
@@ -353,9 +376,34 @@ macro error*(request, message: untyped, http_code = Http404): untyped =
   )
 
 
+macro sendJson*(request, message: untyped, http_code = Http200): untyped =
+  ## Sends JsonNode with "Content-Type": "application/json" in headers.
+  ##
+  ## Translates to:
+  ##   request.respond(
+  ##     Http200,
+  ##     $message,
+  ##     newHttpHeaders([("Content-Type","application/json")]))
+  result = newCall(
+    "respond",
+    request,
+    http_code,
+    newCall("$", message),
+    newCall(
+      "newHttpHeaders",
+      newNimNode(nnkBracket).add(
+        newNimNode(nnkPar).add(
+          newLit("Content-Type"),
+          newLit("application/json")
+        )
+      )
+    )
+  )
+
+
 macro start*(server: ServerRef): untyped =
   ## Starts server.
   result = quote do:
     if AKANE_DEBUG_MODE:
       echo "Server starts on http://", `server`.address, ":", `server`.port
-    waitFor `server`.server.serve(Port(`server`.port), receivepages)
+    waitFor `server`.server.serve(Port(`server`.port), receivepages, `server`.address)
