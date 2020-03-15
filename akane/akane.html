@@ -932,6 +932,10 @@ change it with <a class="reference external" href="#newServer,string,uint16,bool
 <ul class="simple"><li><tt class="docutils literal"><span class="pre">name</span></tt> - template's name, e.g. &quot;index&quot;, &quot;api&quot;, etc.</li>
 <li><tt class="docutils literal"><span class="pre">json</span></tt> - Json data, which replaces in the template.</li>
 </ul>
+<p>Replaces:</p>
+<ul class="simple"><li>$(key) -&gt; value</li>
+<li>if $(key) { ... } -&gt; ... (if value is true)</li>
+</ul>
 
 
 </dd>
@@ -1011,7 +1015,7 @@ Starts server.
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small>Made with Nim. Generated: 2020-03-15 02:23:53 UTC</small>
+        <small>Made with Nim. Generated: 2020-03-15 03:39:34 UTC</small>
       </div>
     </div>
   </div>
