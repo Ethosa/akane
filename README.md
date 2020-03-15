@@ -26,7 +26,7 @@
       var server = newServer(debug=true)  # launch on http://localhost:5000
 
       server.pages:
-        equal("/"):  # when url is "http://...localhost:5000/"
+        equals("/"):  # when url is "http://...localhost:5000/"
           # type of `request` is a Request.
           await request.answer("Hello, world!")  # utf-8 encoded message.
 
@@ -36,6 +36,9 @@
 
 
 # FAQ
+*Q*: Where I can learn this?  
+*A*: You can see [wiki page](https://github.com/Ethosa/akane/wiki/Getting-started)
+
 *Q*: How I can help to develop this project?  
 *A*: You can put a :star: :3
 

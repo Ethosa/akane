@@ -2,7 +2,7 @@
 # Hello world prorgam.
 import akane
 
-var server = newServer("127.0.0.1", 5000, debug=true)  # default params
+let server = newServer("127.0.0.1", 5000, debug=true)  # default params
 
 
 server.pages:
