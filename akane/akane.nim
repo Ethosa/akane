@@ -199,14 +199,15 @@ macro pages*(server: ServerRef, body: untyped): untyped =
   ## -   ``regex``
   ## -   ``notfound`` - this page uses without URL argument.
   runnableExamples:
-    # You can also not write `equals("/")`:
+    let server = newServer(debug=true)
     server.pages:
-      "/helloworld":
-        await request.answer("Hello, world")
       equals("/home"):
         echo url
         echo urlParams
         await request.answer("Home")
+      # You can also not write `equals("/")`:
+      "/helloworld":
+        await request.answer("Hello, world")
   var
     stmtlist = newStmtList()
     notfound_declaration = false
