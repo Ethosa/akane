@@ -51,6 +51,13 @@ proc newServer*(address: string = "127.0.0.1",
   )
 
 
+proc toStr*(node: JsonNode): string =
+  if node.kind == JString:
+    return node.getStr
+  else:
+    return $node
+
+
 proc loadtemplate*(name: string, json: JsonNode = %*{}): Future[string] {.async, inline.} =
   ## Loads HTML template from `templates` folder.
   ##
@@ -61,6 +68,8 @@ proc loadtemplate*(name: string, json: JsonNode = %*{}): Future[string] {.async,
   ## Replaces:
   ## -  $(key) -> value
   ## -  if $(key) { ... } -> ... (if value is true)
+  ## -  if not $(key) { ... } -> ... (if value is false)
+  ## -  for i in 0..$(key) { ... } -> ........., etc
   var
     file = openAsync(("templates" / name) & ".html")
     readed = await file.readAll()
@@ -68,12 +77,15 @@ proc loadtemplate*(name: string, json: JsonNode = %*{}): Future[string] {.async,
   for key, value in json.pairs:
     # ---- regex patterns ---- #
     let
-      # variable statment, e.g.: $(variable)
+      # variable statement, e.g.: $(variable)
       variable_stmt = re("(\\$\\s*\\(" & key & "\\))")
-      # if statment, e.g.: if $(variable) {......}
+      # if statement, e.g.: if $(variable) {......}
       if_stmt = re("if\\s*(\\$\\s*\\(" & key & "\\))\\s*\\{\\s*([\\s\\S]+?)\\s*\\}")
-      # if not statment, e.g.: if not $(variable) {......}
+      # if not statement, e.g.: if not $(variable) {......}
       if_notstmt = re("if\\s*not\\s*(\\$\\s*\\(" & key & "\\))\\s*\\{\\s*([\\s\\S]+?)\\s*\\}")
+      # for statement, e.g.: for i in 0..$(variable) {hello, $variable[i]}
+      forstmt = re(
+        "for\\s*([\\S]+)\\s*in\\s*(\\d+)\\.\\.(\\$\\s*\\(" & key & "\\))\\s*\\{\\s*([\\s\\S]+?)\\s*\\}")
 
     # ---- converts value to bool ---- #
     var value_bool = false
@@ -109,7 +121,19 @@ proc loadtemplate*(name: string, json: JsonNode = %*{}): Future[string] {.async,
         readed = readed.replacef(if_notstmt, "")
       else:
         readed = readed.replacef(if_notstmt, "$2")
-    readed = readed.replacef(variable_stmt, $value)
+    var
+      matches: array[20, string]
+      now = 0
+    while readed.contains(forstmt):
+      let
+        (start, stop) = readed.findBounds(forstmt, matches, now)
+        elem = re("(\\$" & key & "\\[" & matches[0] & "\\])")
+      var output = ""
+      for i in parseInt(matches[1])..<value.len:
+        output &= matches[3].replacef(elem, value[i].toStr)
+      readed = readed[0..start-1] & output & readed[stop+1..^1]
+      now += stop
+    readed = readed.replacef(variable_stmt, value.toStr)
   return readed
 
 
