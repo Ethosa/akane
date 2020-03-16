@@ -198,17 +198,15 @@ macro pages*(server: ServerRef, body: untyped): untyped =
   ## -   ``endswith``
   ## -   ``regex``
   ## -   ``notfound`` - this page uses without URL argument.
-  ##
-  ## You can also not write `equals("/")`:
-  ##   server.pages:
-  ##     "/helloworld":
-  ##       ...
-  ##
-  ## ..code-block::Nim
-  ##  server.pages:
-  ##    equals("/home"):
-  ##      echo url
-  ##      echo urlParams
+  runnableExamples:
+    # You can also not write `equals("/")`:
+    server.pages:
+      "/helloworld":
+        await request.answer("Hello, world")
+      equals("/home"):
+        echo url
+        echo urlParams
+        await request.answer("Home")
   var
     stmtlist = newStmtList()
     notfound_declaration = false
