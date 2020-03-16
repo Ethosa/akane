@@ -34,6 +34,15 @@ type
 var AKANE_DEBUG_MODE*: bool = false  ## change it with `newServer proc<#newServer,string,uint16,bool>`_
 
 
+# ---------- PRIVATE ---------- #
+proc toStr(node: JsonNode): Future[string] {.async.} =
+  if node.kind == JString:
+    return node.getStr
+  else:
+    return $node
+
+
+# ---------- PUBLIC ---------- #
 proc newServer*(address: string = "127.0.0.1",
                 port: uint16 = 5000, debug: bool = false): ServerRef =
   ## Creates a new ServerRef object.
@@ -49,13 +58,6 @@ proc newServer*(address: string = "127.0.0.1",
     address: address, port: port,
     server: newAsyncHttpServer()
   )
-
-
-proc toStr*(node: JsonNode): string =
-  if node.kind == JString:
-    return node.getStr
-  else:
-    return $node
 
 
 proc loadtemplate*(name: string, json: JsonNode = %*{}): Future[string] {.async, inline.} =
@@ -86,6 +88,9 @@ proc loadtemplate*(name: string, json: JsonNode = %*{}): Future[string] {.async,
       # for statement, e.g.: for i in 0..$(variable) {hello, $variable[i]}
       forstmt = re(
         "for\\s*([\\S]+)\\s*in\\s*(\\d+)\\.\\.(\\$\\s*\\(" & key & "\\))\\s*\\{\\s*([\\s\\S]+?)\\s*\\}")
+    var
+      matches: array[20, string]
+      now = 0
 
     # ---- converts value to bool ---- #
     var value_bool = false
@@ -121,19 +126,16 @@ proc loadtemplate*(name: string, json: JsonNode = %*{}): Future[string] {.async,
         readed = readed.replacef(if_notstmt, "")
       else:
         readed = readed.replacef(if_notstmt, "$2")
-    var
-      matches: array[20, string]
-      now = 0
     while readed.contains(forstmt):
       let
         (start, stop) = readed.findBounds(forstmt, matches, now)
         elem = re("(\\$" & key & "\\[" & matches[0] & "\\])")
       var output = ""
       for i in parseInt(matches[1])..<value.len:
-        output &= matches[3].replacef(elem, value[i].toStr)
+        output &= matches[3].replacef(elem, await value[i].toStr)
       readed = readed[0..start-1] & output & readed[stop+1..^1]
       now += stop
-    readed = readed.replacef(variable_stmt, value.toStr)
+    readed = readed.replacef(variable_stmt, await value.toStr)
   return readed
 
 
@@ -198,6 +200,7 @@ macro pages*(server: ServerRef, body: untyped): untyped =
   ## -   ``endswith``
   ## -   ``regex``
   ## -   ``notfound`` - this page uses without URL argument.
+  # ------ EXAMPLES ------ #
   runnableExamples:
     let server = newServer(debug=true)
     server.pages:
@@ -208,6 +211,8 @@ macro pages*(server: ServerRef, body: untyped): untyped =
       # You can also not write `equals("/")`:
       "/helloworld":
         await request.answer("Hello, world")
+
+  # ------ CODE ------ #
   var
     stmtlist = newStmtList()
     notfound_declaration = false
@@ -223,10 +228,8 @@ macro pages*(server: ServerRef, body: untyped): untyped =
             ident("request")
           )
         )
-      )
-    ),
-    newNimNode(nnkLetSection).add(  # let decode_url: string = decodeUrl(request.url.path)
-      newNimNode(nnkIdentDefs).add(
+      ),
+      newNimNode(nnkIdentDefs).add(  # let decode_url: string = decodeUrl(request.url.path)
         ident("decoded_url"),
         ident("string"),
         newCall(
@@ -242,7 +245,7 @@ macro pages*(server: ServerRef, body: untyped): untyped =
     )
   )
   stmtlist.add(newNimNode(nnkIfStmt))
-  var ifstmtlist = stmtlist[2]
+  var ifstmtlist = stmtlist[1]
 
   for i in body:  # for each page in statment list.
     let
