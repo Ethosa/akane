@@ -80,14 +80,14 @@ proc loadtemplate*(name: string, json: JsonNode = %*{}): Future[string] {.async,
     # ---- regex patterns ---- #
     let
       # variable statement, e.g.: $(variable)
-      variable_stmt = re("(\\$\\s*\\(" & key & "\\))")
+      variable_stmt = re("(@" & key & ")")
       # if statement, e.g.: if $(variable) {......}
-      if_stmt = re("if\\s*(\\$\\s*\\(" & key & "\\))\\s*\\{\\s*([\\s\\S]+?)\\s*\\}")
+      if_stmt = re("if\\s*(@" & key & ")\\s*\\{\\s*([\\s\\S]+?)\\s*\\}")
       # if not statement, e.g.: if not $(variable) {......}
-      if_notstmt = re("if\\s*not\\s*(\\$\\s*\\(" & key & "\\))\\s*\\{\\s*([\\s\\S]+?)\\s*\\}")
+      if_notstmt = re("if\\s*not\\s*(@" & key & ")\\s*\\{\\s*([\\s\\S]+?)\\s*\\}")
       # for statement, e.g.: for i in 0..$(variable) {hello, $variable[i]}
       forstmt = re(
-        "for\\s*([\\S]+)\\s*in\\s*(\\d+)\\.\\.(\\$\\s*\\(" & key & "\\))\\s*\\{\\s*([\\s\\S]+?)\\s*\\}")
+        "for\\s*([\\S]+)\\s*in\\s*(\\d+)\\.\\.(@" & key & ")\\s*\\{\\s*([\\s\\S]+?)\\s*\\}")
     var
       matches: array[20, string]
       now = 0
@@ -129,7 +129,7 @@ proc loadtemplate*(name: string, json: JsonNode = %*{}): Future[string] {.async,
     while readed.contains(forstmt):
       let
         (start, stop) = readed.findBounds(forstmt, matches, now)
-        elem = re("(\\$" & key & "\\[" & matches[0] & "\\])")
+        elem = re("(" & key & "\\[" & matches[0] & "\\])")
       var output = ""
       for i in parseInt(matches[1])..<value.len:
         output &= matches[3].replacef(elem, await value[i].toStr)
@@ -223,10 +223,7 @@ macro pages*(server: ServerRef, body: untyped): untyped =
         ident("JsonNode"),
         newCall(
           "await",
-          newCall(
-            "parseQuery",
-            ident("request")
-          )
+          newCall("parseQuery", ident("request"))
         )
       ),
       newNimNode(nnkIdentDefs).add(  # let decode_url: string = decodeUrl(request.url.path)
@@ -257,18 +254,18 @@ macro pages*(server: ServerRef, body: untyped): untyped =
         slist.kind == nnkStmtList):
       if current == "equals":
         slist.insert(0,  # let url: string = `path`
-            newNimNode(nnkLetSection).add(
-              newNimNode(nnkIdentDefs).add(
-                ident("url"),
-                ident("string"),
-                path
-              )
+          newNimNode(nnkLetSection).add(
+            newNimNode(nnkIdentDefs).add(
+              ident("url"), ident("string"), path
             )
           )
+        )
         ifstmtlist.add(  # decoded_url == `path`
           newNimNode(nnkElifBranch).add(
             newCall("==", path, ident("decoded_url")),
-            slist))
+            slist
+          )
+        )
       elif current == "startswith":
         slist.insert(0,  # let url = decoded_url[`path`.len..^1]
           newNimNode(nnkLetSection).add(
@@ -278,21 +275,17 @@ macro pages*(server: ServerRef, body: untyped): untyped =
               newCall(
                 "[]",
                 ident("decoded_url"),
-                newCall(
-                  "..^",
-                  newCall("len", path),
-                  newLit(1))
+                newCall("..^", newCall("len", path), newLit(1))
               )
             )
           )
         )
         ifstmtlist.add(  # decode_url.startsWith(`path`)
           newNimNode(nnkElifBranch).add(
-            newCall(
-              "startsWith",
-              ident("decoded_url"),
-              path),
-            slist))
+            newCall("startsWith", ident("decoded_url"), path),
+            slist
+            )
+          )
       elif current == "endswith":
         slist.insert(0,  # let url: string = decoded_url[0..^`path`.len]
           newNimNode(nnkLetSection).add(
@@ -303,21 +296,18 @@ macro pages*(server: ServerRef, body: untyped): untyped =
                 "[]",
                 ident("decoded_url"),
                 newCall(
-                  "..^",
-                  newLit(0),
-                  newCall("+", newLit(1), newCall("len", path))
+                  "..^", newLit(0), newCall("+", newLit(1), newCall("len", path))
                 )
               )
             )
           )
-          )
+        )
         ifstmtlist.add(  # decode_url.endsWith(`path`)
           newNimNode(nnkElifBranch).add(
-            newCall(
-              "endsWith",
-              ident("decoded_url"),
-              path),
-            slist))
+            newCall("endsWith", ident("decoded_url"), path),
+            slist
+          )
+        )
       elif current == "regex":
         slist.insert(0,  # discard match(decoded_url, `path`, url)
             newNimNode(nnkDiscardStmt).add(
@@ -347,14 +337,10 @@ macro pages*(server: ServerRef, body: untyped): untyped =
       newNimNode(nnkElse).add(
         newCall(  # await request.respond(Http404, "Not found")
           "await",
-          newCall(
-            "respond",
-            ident("request"),
-            ident("Http404"),
-            newLit("Not found"))
-          )
+          newCall("respond", ident("request"), ident("Http404"), newLit("Not found"))
         )
       )
+    )
 
   result = newNimNode(nnkProcDef).add(
     ident("receivepages"),  # procedure name.
