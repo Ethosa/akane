@@ -848,8 +848,6 @@ function main() {
   <ul class="simple simple-toc-section">
       <li><a class="reference" href="#newServer%2Cstring%2Cuint16%2Cbool"
     title="newServer(address: string = &quot;127.0.0.1&quot;; port: uint16 = 5000; debug: bool = false): ServerRef"><wbr />new<wbr />Server<span class="attachedType">ServerRef</span></a></li>
-  <li><a class="reference" href="#toStr%2CJsonNode"
-    title="toStr(node: JsonNode): string"><wbr />to<wbr />Str<span class="attachedType"></span></a></li>
   <li><a class="reference" href="#loadtemplate%2Cstring%2CJsonNode"
     title="loadtemplate(name: string; json: JsonNode = %*{}): Future[string]"><wbr />loadtemplate<span class="attachedType"></span></a></li>
   <li><a class="reference" href="#parseQuery%2CRequest"
@@ -930,13 +928,6 @@ change it with <a class="reference external" href="#newServer,string,uint16,bool
 
 
 </dd>
-<a id="toStr,JsonNode"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#toStr%2CJsonNode"><span class="Identifier">toStr</span></a><span class="Other">(</span><span class="Identifier">node</span><span class="Other">:</span> <span class="Identifier">JsonNode</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">string</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
-<dd>
-
-
-
-</dd>
 <a id="loadtemplate,string,JsonNode"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#loadtemplate%2Cstring%2CJsonNode"><span class="Identifier">loadtemplate</span></a><span class="Other">(</span><span class="Identifier">name</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">;</span> <span class="Identifier">json</span><span class="Other">:</span> <span class="Identifier">JsonNode</span> <span class="Other">=</span> <span class="Operator">%*</span><span class="Other">{</span><span class="Other">}</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">Future</span><span class="Other">[</span><span class="Identifier">string</span><span class="Other">]</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">inline</span><span class="Other">,</span>
     <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">FutureError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
@@ -1010,6 +1001,18 @@ Decodes query.<dl class="docutils"><dt>e.g.:</dt>
 <li><tt class="docutils literal"><span class="pre">regex</span></tt></li>
 <li><tt class="docutils literal"><span class="pre">notfound</span></tt> - this page uses without URL argument.</li>
 </ul>
+<p>When a new request to the server is received, variables are automatically created:</p>
+<ul class="simple"><li><tt class="docutils literal"><span class="pre">request</span></tt> - new Request.</li>
+<li><tt class="docutils literal"><span class="pre">url</span></tt> - matched URL.<ul class="simple"><li><tt class="docutils literal"><span class="pre">equals</span></tt> - URL is request.url.path</li>
+<li><tt class="docutils literal"><span class="pre">startswith</span></tt> - URL is text after <tt class="docutils literal"><span class="pre">startswith</span></tt>.</li>
+<li><tt class="docutils literal"><span class="pre">endswith</span></tt> - URL is text before <tt class="docutils literal"><span class="pre">endswith</span></tt>.</li>
+<li><tt class="docutils literal"><span class="pre">regex</span></tt> - URL is matched text.</li>
+<li><tt class="docutils literal"><span class="pre">notfound</span></tt> - <tt class="docutils literal"><span class="pre">url</span></tt> param not created.</li>
+</ul>
+</li>
+<li><tt class="docutils literal"><span class="pre">urlParams</span></tt> - query URL (in JSON).</li>
+<li><tt class="docutils literal"><span class="pre">decoded_url</span></tt> - URL always is request.url.path</li>
+</ul>
 
 <p><strong class="examples_text">Examples:</strong></p>
 <pre class="listing"><span class="Keyword">let</span> <span class="Identifier">server</span> <span class="Other">=</span> <span class="Identifier">newServer</span><span class="Other">(</span><span class="Identifier">debug</span> <span class="Other">=</span> <span class="Identifier">true</span><span class="Other">)</span>
@@ -1072,7 +1075,7 @@ Starts server.
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small>Made with Nim. Generated: 2020-03-16 13:17:19 UTC</small>
+        <small>Made with Nim. Generated: 2020-03-18 10:01:37 UTC</small>
       </div>
     </div>
   </div>
