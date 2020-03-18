@@ -51,9 +51,11 @@ proc newServer*(address: string = "127.0.0.1",
   ## -   ``address`` - server address, e.g. "127.0.0.1"
   ## -   ``port`` - server port, e.g. 5000
   ## -   ``debug`` - debug mode
+  AKANE_DEBUG_MODE = debug
   if not existsDir("templates"):
     createDir("templates")
-  AKANE_DEBUG_MODE = debug
+    if AKANE_DEBUG_MODE:
+      echo "directory \"templates\" was created."
   return ServerRef(
     address: address, port: port,
     server: newAsyncHttpServer()
@@ -93,27 +95,21 @@ proc loadtemplate*(name: string, json: JsonNode = %*{}): Future[string] {.async,
       now = 0
 
     # ---- converts value to bool ---- #
-    var value_bool = false
-    case value.kind:
-    of JBool:
-      if value.getBool:
-        value_bool = true
-    of JInt:
-      if value.getInt != 0:
-        value_bool = true
-    of JFloat:
-      if value.getFloat != 0.0:
-        value_bool = true
-    of JString:
-      if value.getStr.len > 0:
-        value_bool = true
-    of JArray:
-      if value.len > 0:
-        value_bool = true
-    of JObject:
-      if value.getFields.len > 0:
-        value_bool = true
-    else: discard
+    var value_bool =
+      case value.kind:
+      of JBool:
+        value.getBool
+      of JInt:
+        value.getInt != 0
+      of JFloat:
+        value.getFloat != 0.0
+      of JString:
+        value.getStr.len > 0
+      of JArray:
+        value.len > 0
+      of JObject:
+        value.getFields.len > 0
+      else: false
 
     # ---- replace ----- #
     if readed.contains(if_stmt):
@@ -200,6 +196,17 @@ macro pages*(server: ServerRef, body: untyped): untyped =
   ## -   ``endswith``
   ## -   ``regex``
   ## -   ``notfound`` - this page uses without URL argument.
+  ##
+  ## When a new request to the server is received, variables are automatically created:
+  ## -   ``request`` - new Request.
+  ## -   ``url`` - matched URL.
+  ##     -   ``equals`` - URL is request.url.path
+  ##     -   ``startswith`` - URL is text after `startswith`.
+  ##     -   ``endswith`` - URL is text before `endswith`.
+  ##     -   ``regex`` - URL is matched text.
+  ##     -   ``notfound`` - `url` param not created.
+  ## -   ``urlParams`` - query URL (in JSON).
+  ## -   ``decoded_url`` - URL always is request.url.path
   # ------ EXAMPLES ------ #
   runnableExamples:
     let server = newServer(debug=true)
