@@ -856,6 +856,8 @@ function main() {
     title="password2hash(password: string): Future[string]"><wbr />password2hash<span class="attachedType"></span></a></li>
   <li><a class="reference" href="#validatePassword%2Cstring%2Cstring"
     title="validatePassword(password, hashpassword: string): Future[bool]"><wbr />validate<wbr />Password<span class="attachedType"></span></a></li>
+  <li><a class="reference" href="#newCookie%2CServerRef%2Cstring%2Cstring%2Cstring"
+    title="newCookie(server: ServerRef; key, value: string; domain = &quot;&quot;): HttpHeaders"><wbr />new<wbr />Cookie<span class="attachedType">ServerRef</span></a></li>
 
   </ul>
 </li>
@@ -864,10 +866,12 @@ function main() {
   <ul class="simple simple-toc-section">
       <li><a class="reference" href="#pages.m%2CServerRef%2Cuntyped"
     title="pages(server: ServerRef; body: untyped): untyped"><wbr />pages<span class="attachedType">ServerRef</span></a></li>
-  <li><a class="reference" href="#answer.m%2Cuntyped%2Cuntyped"
-    title="answer(request, message: untyped; http_code = Http200): untyped"><wbr />answer<span class="attachedType"></span></a></li>
-  <li><a class="reference" href="#error.m%2Cuntyped%2Cuntyped"
-    title="error(request, message: untyped; http_code = Http404): untyped"><wbr />error<span class="attachedType"></span></a></li>
+  <li><a class="reference" href="#answer.m%2Cuntyped%2Cuntyped%2CHttpHeaders"
+    title="answer(request, message: untyped; http_code = Http200;
+       headers: HttpHeaders = newHttpHeaders()): untyped"><wbr />answer<span class="attachedType"></span></a></li>
+  <li><a class="reference" href="#error.m%2Cuntyped%2Cuntyped%2CHttpHeaders"
+    title="error(request, message: untyped; http_code = Http404;
+      headers: HttpHeaders = newHttpHeaders()): untyped"><wbr />error<span class="attachedType"></span></a></li>
   <li><a class="reference" href="#sendJson.m%2Cuntyped%2Cuntyped"
     title="sendJson(request, message: untyped; http_code = Http200): untyped"><wbr />send<wbr />Json<span class="attachedType"></span></a></li>
   <li><a class="reference" href="#start.m%2CServerRef"
@@ -939,10 +943,11 @@ change it with <a class="reference external" href="#newServer,string,uint16,bool
 <li><tt class="docutils literal"><span class="pre">json</span></tt> - Json data, which replaces in the template.</li>
 </ul>
 <p>Replaces:</p>
-<ul class="simple"><li>$(key) -&gt; value</li>
-<li>if $(key) { ... } -&gt; ... (if value is true)</li>
-<li>if not $(key) { ... } -&gt; ... (if value is false)</li>
-<li>for i in 0..$(key) { ... } -&gt; ........., etc</li>
+<ul class="simple"><li>@key -&gt; value</li>
+<li>if @key { ... } -&gt; ... (if value is true)</li>
+<li>if not @key { ... } -&gt; ... (if value is false)</li>
+<li>for i in 0..@key { ... } -&gt; ........., etc</li>
+<li>@key[0] -&gt; key[0]</li>
 </ul>
 
 
@@ -984,6 +989,14 @@ Decodes query.<dl class="docutils"><dt>e.g.:</dt>
 
 
 </dd>
+<a id="newCookie,ServerRef,string,string,string"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#newCookie%2CServerRef%2Cstring%2Cstring%2Cstring"><span class="Identifier">newCookie</span></a><span class="Other">(</span><span class="Identifier">server</span><span class="Other">:</span> <a href="akane.html#ServerRef"><span class="Identifier">ServerRef</span></a><span class="Other">;</span> <span class="Identifier">key</span><span class="Other">,</span> <span class="Identifier">value</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">;</span> <span class="Identifier">domain</span> <span class="Other">=</span> <span class="StringLit">&quot;&quot;</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">HttpHeaders</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">inline</span><span class="Other">,</span>
+    <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dd>
+
+Creates a new cookies
+
+</dd>
 
 </dl></div>
 <div class="section" id="17">
@@ -1012,6 +1025,7 @@ Decodes query.<dl class="docutils"><dt>e.g.:</dt>
 </li>
 <li><tt class="docutils literal"><span class="pre">urlParams</span></tt> - query URL (in JSON).</li>
 <li><tt class="docutils literal"><span class="pre">decoded_url</span></tt> - URL always is request.url.path</li>
+<li><tt class="docutils literal"><span class="pre">cookies</span></tt> - StringTable of cookies.</li>
 </ul>
 
 <p><strong class="examples_text">Examples:</strong></p>
@@ -1025,8 +1039,9 @@ Decodes query.<dl class="docutils"><dt>e.g.:</dt>
     <span class="Identifier">await</span> <span class="Identifier">request</span><span class="Other">.</span><span class="Identifier">answer</span><span class="Other">(</span><span class="StringLit">&quot;Hello, world&quot;</span><span class="Other">)</span></pre>
 
 </dd>
-<a id="answer.m,untyped,untyped"></a>
-<dt><pre><span class="Keyword">macro</span> <a href="#answer.m%2Cuntyped%2Cuntyped"><span class="Identifier">answer</span></a><span class="Other">(</span><span class="Identifier">request</span><span class="Other">,</span> <span class="Identifier">message</span><span class="Other">:</span> <span class="Identifier">untyped</span><span class="Other">;</span> <span class="Identifier">http_code</span> <span class="Other">=</span> <span class="Identifier">Http200</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">untyped</span></pre></dt>
+<a id="answer.m,untyped,untyped,HttpHeaders"></a>
+<dt><pre><span class="Keyword">macro</span> <a href="#answer.m%2Cuntyped%2Cuntyped%2CHttpHeaders"><span class="Identifier">answer</span></a><span class="Other">(</span><span class="Identifier">request</span><span class="Other">,</span> <span class="Identifier">message</span><span class="Other">:</span> <span class="Identifier">untyped</span><span class="Other">;</span> <span class="Identifier">http_code</span> <span class="Other">=</span> <span class="Identifier">Http200</span><span class="Other">;</span>
+            <span class="Identifier">headers</span><span class="Other">:</span> <span class="Identifier">HttpHeaders</span> <span class="Other">=</span> <span class="Identifier">newHttpHeaders</span><span class="Other">(</span><span class="Other">)</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">untyped</span></pre></dt>
 <dd>
 
 Responds from server with utf-8.<dl class="docutils"><dt>Translates to:</dt>
@@ -1035,8 +1050,9 @@ Responds from server with utf-8.<dl class="docutils"><dt>Translates to:</dt>
 
 
 </dd>
-<a id="error.m,untyped,untyped"></a>
-<dt><pre><span class="Keyword">macro</span> <a href="#error.m%2Cuntyped%2Cuntyped"><span class="Identifier">error</span></a><span class="Other">(</span><span class="Identifier">request</span><span class="Other">,</span> <span class="Identifier">message</span><span class="Other">:</span> <span class="Identifier">untyped</span><span class="Other">;</span> <span class="Identifier">http_code</span> <span class="Other">=</span> <span class="Identifier">Http404</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">untyped</span></pre></dt>
+<a id="error.m,untyped,untyped,HttpHeaders"></a>
+<dt><pre><span class="Keyword">macro</span> <a href="#error.m%2Cuntyped%2Cuntyped%2CHttpHeaders"><span class="Identifier">error</span></a><span class="Other">(</span><span class="Identifier">request</span><span class="Other">,</span> <span class="Identifier">message</span><span class="Other">:</span> <span class="Identifier">untyped</span><span class="Other">;</span> <span class="Identifier">http_code</span> <span class="Other">=</span> <span class="Identifier">Http404</span><span class="Other">;</span>
+           <span class="Identifier">headers</span><span class="Other">:</span> <span class="Identifier">HttpHeaders</span> <span class="Other">=</span> <span class="Identifier">newHttpHeaders</span><span class="Other">(</span><span class="Other">)</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">untyped</span></pre></dt>
 <dd>
 
 Responds from server with utf-8.<dl class="docutils"><dt>Translates to:</dt>
@@ -1075,7 +1091,7 @@ Starts server.
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small>Made with Nim. Generated: 2020-03-18 10:01:37 UTC</small>
+        <small>Made with Nim. Generated: 2020-03-19 06:52:23 UTC</small>
       </div>
     </div>
   </div>
