@@ -2,13 +2,15 @@
 # ----- CORE ----- #
 import asyncdispatch
 import asynchttpserver
+import macros
 
 # ----- SUPPORT ----- #
 import asyncfile  # loadtemplate
 import strutils  # startsWith, endsWith
+import strtabs
+import cookies
 import tables
-import macros
-import times
+import times  # for local()
 import json  # urlParams
 import uri  # decodeUrl
 import std/sha1  # sha1 passwords.
@@ -19,6 +21,8 @@ import re  # regex
 export asyncdispatch
 export asynchttpserver
 export strutils
+export cookies
+export strtabs
 export json
 export uri
 export re
@@ -70,10 +74,11 @@ proc loadtemplate*(name: string, json: JsonNode = %*{}): Future[string] {.async,
   ## -   ``json`` - Json data, which replaces in the template.
   ##
   ## Replaces:
-  ## -  $(key) -> value
-  ## -  if $(key) { ... } -> ... (if value is true)
-  ## -  if not $(key) { ... } -> ... (if value is false)
-  ## -  for i in 0..$(key) { ... } -> ........., etc
+  ## -  @key -> value
+  ## -  if @key { ... } -> ... (if value is true)
+  ## -  if not @key { ... } -> ... (if value is false)
+  ## -  for i in 0..@key { ... } -> ........., etc
+  ## -  @key[0] -> key[0]
   var
     file = openAsync(("templates" / name) & ".html")
     readed = await file.readAll()
@@ -167,6 +172,7 @@ proc parseQuery*(request: Request): Future[JsonNode] {.async.} =
       " ", hour, ":", minute, ":", second,
       " Request from ", request.hostname,
       " to url \"", decodeUrl(request.url.path), "\".")
+    echo request
 
 
 proc password2hash*(password: string): Future[string] {.async, inline.} =
@@ -184,6 +190,12 @@ proc validatePassword*(password, hashpassword: string): Future[bool] {.async, in
   ## -   ``password`` - got password from user input.
   ## -   ``hashpassword`` - response from `password2hash proc <#password2hash,string>`_
   return secureHash(password) == parseSecureHash(hashpassword)
+
+
+proc newCookie*(server: ServerRef, key, value: string, domain = ""): HttpHeaders {.inline.} =
+  ## Creates a new cookies
+  let d = if domain != "": domain else: server.address
+  return newHttpHeaders([("Set-Cookie", setCookie(key, value, d, noName=true))])
 
 
 macro pages*(server: ServerRef, body: untyped): untyped =
@@ -207,6 +219,7 @@ macro pages*(server: ServerRef, body: untyped): untyped =
   ##     -   ``notfound`` - `url` param not created.
   ## -   ``urlParams`` - query URL (in JSON).
   ## -   ``decoded_url`` - URL always is request.url.path
+  ## -   ``cookies`` - StringTable of cookies.
   # ------ EXAMPLES ------ #
   runnableExamples:
     let server = newServer(debug=true)
@@ -243,6 +256,28 @@ macro pages*(server: ServerRef, body: untyped): untyped =
               ident("request"), ident("url")
             ),
             ident("path")
+          )
+        )
+      ),
+      newNimNode(nnkIdentDefs).add(  # let cookies: string = parseCookies(request.headers.cookie)
+        ident("cookies"),
+        ident("StringTableRef"),
+        newNimNode(nnkIfExpr).add(
+          newNimNode(nnkElifExpr).add(
+            newCall("hasKey", newNimNode(nnkDotExpr).add(ident("request"), ident("headers")), newLit("cookie")),
+            newCall(
+              "parseCookies",
+              newCall(
+                "[]",
+                newNimNode(nnkDotExpr).add(
+                  ident("request"), ident("headers")
+                ),
+                newLit("cookie")
+              )
+            )
+          ),
+          newNimNode(nnkElseExpr).add(
+            newCall("newStringTable", ident("modeCaseSensitive"))
           )
         )
       )
@@ -369,7 +404,8 @@ macro pages*(server: ServerRef, body: untyped): untyped =
     stmtlist)
 
 
-macro answer*(request, message: untyped, http_code = Http200): untyped =
+macro answer*(request, message: untyped, http_code = Http200,
+             headers: HttpHeaders = newHttpHeaders()): untyped =
   ## Responds from server with utf-8.
   ##
   ## Translates to:
@@ -378,11 +414,13 @@ macro answer*(request, message: untyped, http_code = Http200): untyped =
     "respond",
     request,
     http_code,
-    newCall("&", newLit("<head><meta charset='utf-8'></head>"), message)
+    newCall("&", newLit("<head><meta charset='utf-8'></head>"), message),
+    headers
   )
 
 
-macro error*(request, message: untyped, http_code = Http404): untyped =
+macro error*(request, message: untyped, http_code = Http404,
+             headers: HttpHeaders = newHttpHeaders()): untyped =
   ## Responds from server with utf-8.
   ##
   ## Translates to:
@@ -391,7 +429,8 @@ macro error*(request, message: untyped, http_code = Http404): untyped =
     "respond",
     request,
     http_code,
-    newCall("&", newLit("<head><meta charset='utf-8'></head>"), message)
+    newCall("&", newLit("<head><meta charset='utf-8'></head>"), message),
+    headers
   )
 
 
