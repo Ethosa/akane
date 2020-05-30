@@ -9,12 +9,12 @@
 <h4>Stable version - 0.1.0</h4>
 </div>
 
-# Install
+## Install
 -   git: `nimble install https://github.com/Ethosa/akane.git`
 -   nimble: `nimble install akane`
 
 
-# Features
+## Features
 -   Pages with URL handling methods: `equals`, `startswith`, `endswith`, `regex`,`notfound`.
 -   `templates` folder.
 -   Only the standard library used.
@@ -39,7 +39,7 @@
     ```
 
 
-# FAQ
+## FAQ
 *Q*: Where I can learn this?  
 *A*: You can see [wiki page](https://github.com/Ethosa/akane/wiki/Getting-started)
 
