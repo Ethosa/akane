@@ -15,13 +15,13 @@
 
 
 ## Features
--   Pages with URL handling methods: `equals`, `startswith`, `endswith`, `regex`,`notfound`.
--   `templates` folder.
--   Only the standard library used.
--   Debug mode.
--   Password hashing.
--   Working with cookies.
--   Simple usage
+-   Pages with URL handling methods: `equals`, `startswith`, `endswith`, `regex`,`notfound`;
+-   `templates` folder;
+-   Only the standard library used;
+-   Debug mode;
+-   Password hashing;
+-   Working with cookies;
+-   Simple usage:
     ```nim
     import akane
 
