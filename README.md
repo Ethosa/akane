@@ -47,7 +47,7 @@ For enable debug mode, please, compile with `-d:debug` or `--define:debug`.
 *A*: You can see [wiki page](https://github.com/Ethosa/akane/wiki/Getting-started)
 
 *Q*: Where can I find the docs?  
-*A*: You can see [docs page](https://ethosa.github.io/akane/akane/akane.html)
+*A*: You can see [docs page](https://ethosa.github.io/akane/akane.html)
 
 *Q*: How can I help to develop this project?  
 *A*: You can put a :star: :3
