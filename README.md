@@ -5,8 +5,8 @@
 [![Nim language-plastic](https://github.com/Ethosa/yukiko/blob/master/nim-lang.svg)](https://github.com/Ethosa/yukiko/blob/master/nim-lang.svg)
 [![License](https://img.shields.io/github/license/Ethosa/akane)](https://github.com/Ethosa/akane/blob/master/LICENSE)
 
-<h4>Latest version - 0.1.0</h4>
-<h4>Stable version - 0.1.0</h4>
+<h4>Latest version - 0.1.1</h4>
+<h4>Stable version - 0.1.1</h4>
 </div>
 
 ## Install
@@ -26,7 +26,7 @@
     import akane
 
     proc main =  # for gcsafe
-      var server = newServer(debug=true)  # launch on http://localhost:5000
+      var server = newServer()  # launch on http://localhost:5000
 
       server.pages:
         equals("/"):  # when url is "http://...localhost:5000/"
@@ -38,6 +38,8 @@
     main()
     ```
 
+## Debug mode
+For enable debug mode, please, compile with `-d:debug` or `--define:debug`.
 
 ## FAQ
 *Q*: Where can I learn this?  
