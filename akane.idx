@@ -1,0 +1,19 @@
+Simple usage	akane.html#simple-usage	  Simple usage	
+ServerRef	akane.html#ServerRef	akane: ServerRef	
+Example	akane.html#example	  Example	
+newServer	akane.html#newServer,string,uint16	akane: newServer(address: string = &quot;127.0.0.1&quot;; port: uint16 = 5000): ServerRef	
+Example	akane.html#example	  Example	
+loadtemplate	akane.html#loadtemplate,string,JsonNode	akane: loadtemplate(name: string; json: JsonNode = %*{}): Future[string]	
+parseQuery	akane.html#parseQuery,Request	akane: parseQuery(request: Request): Future[JsonNode]	
+password2hash	akane.html#password2hash,string	akane: password2hash(password: string): Future[string]	
+validatePassword	akane.html#validatePassword,string,string	akane: validatePassword(password, hashpassword: string): Future[bool]	
+newCookie	akane.html#newCookie,ServerRef,string,string,string	akane: newCookie(server: ServerRef; key, value: string; domain = &quot;&quot;): HttpHeaders	
+pages	akane.html#pages.m,ServerRef,untyped	akane: pages(server: ServerRef; body: untyped): untyped	
+Example	akane.html#example	  Example	
+answer	akane.html#answer.m,untyped,untyped,HttpHeaders	akane: answer(request, message: untyped; http_code = Http200;\n       headers: HttpHeaders = newHttpHeaders()): untyped	
+Example	akane.html#example	  Example	
+error	akane.html#error.m,untyped,untyped,HttpHeaders	akane: error(request, message: untyped; http_code = Http404;\n      headers: HttpHeaders = newHttpHeaders()): untyped	
+Example	akane.html#example	  Example	
+sendJson	akane.html#sendJson.m,untyped,untyped	akane: sendJson(request, message: untyped; http_code = Http200): untyped	
+Example	akane.html#example	  Example	
+start	akane.html#start.m,ServerRef	akane: start(server: ServerRef): untyped	
