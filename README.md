@@ -4,10 +4,9 @@
 [![Open Source Love](https://badges.frapsoft.com/os/v1/open-source.png?v=103)](https://github.com/ellerbrock/open-source-badges/)
 [![Nim language-plastic](https://github.com/Ethosa/yukiko/blob/master/nim-lang.svg)](https://github.com/Ethosa/yukiko/blob/master/nim-lang.svg)
 [![License](https://img.shields.io/github/license/Ethosa/akane)](https://github.com/Ethosa/akane/blob/master/LICENSE)
-[![test](https://github.com/Ethosa/akane/workflows/test/badge.svg)](https://github.com/Ethosa/akane/actions)
 
-<h4>Latest version - 0.1.1</h4>
-<h4>Stable version - 0.1.1</h4>
+<h4>Latest version - 0.1.0</h4>
+<h4>Stable version - 0.1.0</h4>
 </div>
 
 ## Install
@@ -16,18 +15,18 @@
 
 
 ## Features
--   Pages with URL handling methods: `equals`, `startswith`, `endswith`, `regex`,`notfound`.
--   `templates` folder.
--   Only the standard library used.
--   Debug mode.
--   Password hashing.
--   Working with cookies.
--   Simple usage
+-   Pages with URL handling methods: `equals`, `startswith`, `endswith`, `regex`,`notfound`;
+-   `templates` folder;
+-   Only the standard library used;
+-   Debug mode;
+-   Password hashing;
+-   Working with cookies;
+-   Simple usage:
     ```nim
     import akane
 
     proc main =  # for gcsafe
-      var server = newServer()  # launch on http://localhost:5000
+      var server = newServer(debug=true)  # launch on http://localhost:5000
 
       server.pages:
         equals("/"):  # when url is "http://...localhost:5000/"
@@ -39,18 +38,15 @@
     main()
     ```
 
-## Debug mode
-For run in debug mode use `-d:debug` or `--define:debug`.
-
 
 ## FAQ
-*Q*: Where I can learn this?  
+*Q*: Where can I learn this?  
 *A*: You can see [wiki page](https://github.com/Ethosa/akane/wiki/Getting-started)
 
-*Q*: Where I can find the docs?  
+*Q*: Where can I find the docs?  
 *A*: You can see [docs page](https://ethosa.github.io/akane/akane/akane.html)
 
-*Q*: How I can help to develop this project?  
+*Q*: How can I help to develop this project?  
 *A*: You can put a :star: :3
 
 
