@@ -57,10 +57,9 @@ jobs:
       - name: Build tests
         run: |
           cd tests
-          for file in $(ls -v test*); do
-            cd $file
-            echo "test: $file"
+          for folder in $(ls -v test*); do
+            echo "test: $folder"
+            cd $folder
             nim c -d:ssl main.nim
-            cd ../
           done
         shell: bash
