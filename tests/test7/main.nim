@@ -4,7 +4,7 @@ import akane
 
 
 proc main =
-  var server = newServer(debug=true)
+  var server = newServer()
 
   server.pages:
     "/":

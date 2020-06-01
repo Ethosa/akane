@@ -1,11 +1,10 @@
-# author: Ethosa
-# password shashing.
+# --- Test 5. password shashing. --- #
 import akane
 
 
 proc main {.async.} =  # main proc for gcsafe
   var
-    server = newServer(debug=true)
+    server = newServer()
     hashpassword = await password2hash("Hello world")
 
   server.pages:

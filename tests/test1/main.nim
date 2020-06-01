@@ -1,8 +1,7 @@
-# author: Ethosa
-# Hello world prorgam.
+# --- Test 1. Hello world prorgam. --- #
 import akane
 
-let server = newServer("127.0.0.1", 5000, debug=true)  # default params
+let server = newServer("127.0.0.1", 5000)  # default params
 
 
 server.pages:

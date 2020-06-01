@@ -1,11 +1,10 @@
-# author: Ethosa
-# Working with templates.
+# --- Test 4.Working with templates. --- #
 import akane
 
 
 proc main =  # main proc for gcsafe
   var
-    server = newServer(debug=true)
+    server = newServer()
     data: JsonNode = %{
       "myvariable": %0,
       "can_place": %false,

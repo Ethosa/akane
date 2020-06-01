@@ -4,17 +4,18 @@
 [![Open Source Love](https://badges.frapsoft.com/os/v1/open-source.png?v=103)](https://github.com/ellerbrock/open-source-badges/)
 [![Nim language-plastic](https://github.com/Ethosa/yukiko/blob/master/nim-lang.svg)](https://github.com/Ethosa/yukiko/blob/master/nim-lang.svg)
 [![License](https://img.shields.io/github/license/Ethosa/akane)](https://github.com/Ethosa/akane/blob/master/LICENSE)
+[![test](https://github.com/Ethosa/akane/workflows/test/badge.svg)](https://github.com/Ethosa/akane/actions)
 
-<h4>Latest version - 0.1.0</h4>
-<h4>Stable version - 0.1.0</h4>
+<h4>Latest version - 0.1.1</h4>
+<h4>Stable version - 0.1.1</h4>
 </div>
 
-# Install
+## Install
 -   git: `nimble install https://github.com/Ethosa/akane.git`
 -   nimble: `nimble install akane`
 
 
-# Features
+## Features
 -   Pages with URL handling methods: `equals`, `startswith`, `endswith`, `regex`,`notfound`.
 -   `templates` folder.
 -   Only the standard library used.
@@ -26,7 +27,7 @@
     import akane
 
     proc main =  # for gcsafe
-      var server = newServer(debug=true)  # launch on http://localhost:5000
+      var server = newServer()  # launch on http://localhost:5000
 
       server.pages:
         equals("/"):  # when url is "http://...localhost:5000/"
@@ -38,8 +39,11 @@
     main()
     ```
 
+## Debug mode
+For run in debug mode use `-d:debug` or `--define:debug`.
 
-# FAQ
+
+## FAQ
 *Q*: Where I can learn this?  
 *A*: You can see [wiki page](https://github.com/Ethosa/akane/wiki/Getting-started)
 

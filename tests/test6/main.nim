@@ -1,11 +1,10 @@
-# author: Ethosa
-# templates for
+# --- Test6. `for` template --- #
 import akane
 
 
 proc main =
   var
-    server = newServer(debug=true)
+    server = newServer()
     data = %*{
       "fruits": %["apple", "banana"]
     }

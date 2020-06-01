@@ -1,8 +1,7 @@
-# author: Ethosa
-# equals, startswith, endswith, notfound and regex.
+# --- Test 3. equals, startswith, endswith, notfound and regex. --- #
 import akane
 
-var server = newServer(debug=true)
+var server = newServer()
 
 
 server.pages:

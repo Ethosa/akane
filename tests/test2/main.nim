@@ -1,5 +1,4 @@
-# author: Ethosa
-# Templates.
+# --- Test 2. Templates. --- #
 import akane
 
 var server = newServer()

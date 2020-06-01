@@ -10,7 +10,6 @@ import strutils  # startsWith, endsWith
 import strtabs
 import cookies
 import tables
-import times  # for local()
 import json  # urlParams
 import uri  # decodeUrl
 import std/sha1  # sha1 passwords.
@@ -28,14 +27,39 @@ export uri
 export re
 
 
+when defined(debug):
+  import logging
+
+  var console_logger = newConsoleLogger(fmtStr="[$time]::$levelname - ")
+  addHandler(console_logger)
+
+  when not defined(android):
+    var file_logger = newFileLogger("logs.log", fmtStr="[$date at $time]::$levelname - ")
+    addHandler(file_logger)
+
+  info("Compiled in debug mode.")
+
+
+## ## Simple usage
+## .. code-block:: nim
+##
+##    let my_server = newServer("127.0.0.1", 8080)  # starts server at https://127.0.0.1:8080
+##
+##    my_sever.pages:
+##      "/":
+##        echo "Index page"
+##        await request.answer("Hello, world!")
+##      notfound:
+##        echo "oops :("
+##        await request.error("404 Page not found.")
+
+
+
 type
   ServerRef* = ref object
     port*: uint16
     address*: string
     server*: AsyncHttpServer
-
-
-var AKANE_DEBUG_MODE*: bool = false  ## change it with `newServer proc<#newServer,string,uint16,bool>`_
 
 
 # ---------- PRIVATE ---------- #
@@ -47,31 +71,30 @@ proc toStr(node: JsonNode): Future[string] {.async.} =
 
 
 # ---------- PUBLIC ---------- #
-proc newServer*(address: string = "127.0.0.1",
-                port: uint16 = 5000, debug: bool = false): ServerRef =
+proc newServer*(address: string = "127.0.0.1", port: uint16 = 5000): ServerRef =
   ## Creates a new ServerRef object.
   ##
   ## Arguments:
-  ## -   ``address`` - server address, e.g. "127.0.0.1"
-  ## -   ``port`` - server port, e.g. 5000
-  ## -   ``debug`` - debug mode
-  AKANE_DEBUG_MODE = debug
+  ## - `address` - server address, e.g. "127.0.0.1"
+  ## - `port` - server port, e.g. 5000
+  ##
+  ## ## Example
+  ## .. code-block:: nim
+  ##
+  ##    let server = newServer("127.0.0.1", 5000)
   if not existsDir("templates"):
     createDir("templates")
-    if AKANE_DEBUG_MODE:
-      echo "directory \"templates\" was created."
-  return ServerRef(
-    address: address, port: port,
-    server: newAsyncHttpServer()
-  )
+    when defined(debug):
+      debug("directory \"templates\" was created.")
+  ServerRef(address: address, port: port, server: newAsyncHttpServer())
 
 
 proc loadtemplate*(name: string, json: JsonNode = %*{}): Future[string] {.async, inline.} =
   ## Loads HTML template from `templates` folder.
   ##
   ## Arguments:
-  ## -   ``name`` - template's name, e.g. "index", "api", etc.
-  ## -   ``json`` - Json data, which replaces in the template.
+  ## - `name` - template's name, e.g. "index", "api", etc.
+  ## - `json` - Json data, which replaces in the template.
   ##
   ## Replaces:
   ## -  @key -> value
@@ -79,6 +102,11 @@ proc loadtemplate*(name: string, json: JsonNode = %*{}): Future[string] {.async,
   ## -  if not @key { ... } -> ... (if value is false)
   ## -  for i in 0..@key { ... } -> ........., etc
   ## -  @key[0] -> key[0]
+  ##
+  ## ## Example
+  ## .. code-block:: nim
+  ##
+  ##    let template = loadtemplate("index.html", %*{"a": 5})
   var
     file = openAsync(("templates" / name) & ".html")
     readed = await file.readAll()
@@ -145,41 +173,28 @@ proc parseQuery*(request: Request): Future[JsonNode] {.async.} =
   ## e.g.:
   ##   "a=5&b=10" -> {"a": "5", "b": "10"}
   ##
-  ## This also have debug output, if AKANE_DEBUG_MODE is true.
+  ## This also have debug output, if compiled in debug mode.
   var data = request.url.query.split("&")
   result = %*{}
   for i in data:
     let timed = i.split("=")
     if timed.len > 1:
       result[decodeUrl(timed[0])] = %decodeUrl(timed[1])
-  if AKANE_DEBUG_MODE:
-    let
-      now = times.local(times.getTime())
-      timed_month = ord(now.month)
-      month = if timed_month > 9: $timed_month else: "0" & $timed_month
-      day = if now.monthday > 9: $now.monthday else: "0" & $now.monthday
-      hour = if now.hour > 9: $now.hour else: "0" & $now.hour
-      minute = if now.minute > 9: $now.minute else: "0" & $now.minute
-      second = if now.second > 9: $now.second else: "0" & $now.second
-      host =
-        if request.headers.hasKey("host") and request.headers["host"].len > 1:
-          request.headers["host"] & " "
-        else:
-          "new "
-    echo(
-      host, request.reqMethod,
-      " at ", now.year, ".", month, ".", day,
-      " ", hour, ":", minute, ":", second,
-      " Request from ", request.hostname,
-      " to url \"", decodeUrl(request.url.path), "\".")
-    echo request
+  when defined(debug):
+    let host =
+      if request.headers.hasKey("host") and request.headers["host"].len > 1:
+        request.headers["host"] & " "
+      else:
+        "new "
+    debug(host, request.reqMethod, " Request from ", request.hostname, " to url \"", decodeUrl(request.url.path), "\".")
+    debug(request)
 
 
 proc password2hash*(password: string): Future[string] {.async, inline.} =
   ## Generates a sha1 from `password`.
   ##
   ## Arguments:
-  ## -   ``password`` - user password.
+  ## - `password` is an user password.
   return $secureHash(password)
 
 
@@ -187,13 +202,18 @@ proc validatePassword*(password, hashpassword: string): Future[bool] {.async, in
   ## Validates the password and returns true, if the password is valid.
   ##
   ## Arguments:
-  ## -   ``password`` - got password from user input.
-  ## -   ``hashpassword`` - response from `password2hash proc <#password2hash,string>`_
+  ## - `password` is a got password from user input.
+  ## - `hashpassword` is a response from `password2hash proc <#password2hash,string>`_
   return secureHash(password) == parseSecureHash(hashpassword)
 
 
 proc newCookie*(server: ServerRef, key, value: string, domain = ""): HttpHeaders {.inline.} =
   ## Creates a new cookies
+  ##
+  ## Arguments:
+  ## - `key` is a cookie key.
+  ## - `value` is a new cookie value.
+  ## - `domain` is a cookie doomain.
   let d = if domain != "": domain else: server.address
   return newHttpHeaders([("Set-Cookie", setCookie(key, value, d, noName=true))])
 
@@ -203,26 +223,26 @@ macro pages*(server: ServerRef, body: untyped): untyped =
   ##
   ## `body` should be StmtList.
   ## page type can be:
-  ## -   ``equals``
-  ## -   ``startswith``
-  ## -   ``endswith``
-  ## -   ``regex``
-  ## -   ``notfound`` - this page uses without URL argument.
+  ## - `equals`
+  ## - `startswith`
+  ## - `endswith`
+  ## - `regex` - match url via regex.
+  ## - `notfound` - this page uses without URL argument.
   ##
   ## When a new request to the server is received, variables are automatically created:
-  ## -   ``request`` - new Request.
-  ## -   ``url`` - matched URL.
-  ##     -   ``equals`` - URL is request.url.path
-  ##     -   ``startswith`` - URL is text after `startswith`.
-  ##     -   ``endswith`` - URL is text before `endswith`.
-  ##     -   ``regex`` - URL is matched text.
-  ##     -   ``notfound`` - `url` param not created.
-  ## -   ``urlParams`` - query URL (in JSON).
-  ## -   ``decoded_url`` - URL always is request.url.path
-  ## -   ``cookies`` - StringTable of cookies.
+  ## - `request` - new Request.
+  ## - `url` - matched URL.
+  ##   - `equals` - URL is request.url.path
+  ##   - `startswith` - URL is text after `startswith`.
+  ##   - `endswith` - URL is text before `endswith`.
+  ##   - `regex` - URL is matched text.
+  ##   - `notfound` - `url` param not created.
+  ## - `urlParams` - query URL (in JSON).
+  ## - `decoded_url` - URL always is request.url.path
+  ## - `cookies` - StringTable of cookies.
   # ------ EXAMPLES ------ #
   runnableExamples:
-    let server = newServer(debug=true)
+    let server = newServer()
     server.pages:
       equals("/home"):
         echo url
@@ -408,8 +428,16 @@ macro answer*(request, message: untyped, http_code = Http200,
              headers: HttpHeaders = newHttpHeaders()): untyped =
   ## Responds from server with utf-8.
   ##
-  ## Translates to:
-  ##   request.respond(Http200, "<head><meta charset='utf-8'></head>" & message)
+  ## Translates to
+  ##
+  ## .. code-block:: nim
+  ##
+  ##    request.respond(Http200, "<head><meta charset='utf-8'></head>" & message)
+  ##
+  ## ## Example
+  ## .. code-block:: nim
+  ##
+  ##    await request.answer("hello!")
   result = newCall(
     "respond",
     request,
@@ -423,8 +451,16 @@ macro error*(request, message: untyped, http_code = Http404,
              headers: HttpHeaders = newHttpHeaders()): untyped =
   ## Responds from server with utf-8.
   ##
-  ## Translates to:
-  ##   request.respond(Http404, "<head><meta charset='utf-8'></head>" & message)
+  ## Translates to
+  ##
+  ## .. code-block:: nim
+  ##
+  ##    request.respond(Http404, "<head><meta charset='utf-8'></head>" & message)
+  ##
+  ## ## Example
+  ## .. code-block:: nim
+  ##
+  ##    await request.error("Oops! :(")
   result = newCall(
     "respond",
     request,
@@ -437,11 +473,16 @@ macro error*(request, message: untyped, http_code = Http404,
 macro sendJson*(request, message: untyped, http_code = Http200): untyped =
   ## Sends JsonNode with "Content-Type": "application/json" in headers.
   ##
-  ## Translates to:
-  ##   request.respond(
-  ##     Http200,
-  ##     $message,
-  ##     newHttpHeaders([("Content-Type","application/json")]))
+  ## Translates to
+  ##
+  ## .. code-block:: nim
+  ##
+  ##    request.respond(Http200, $message, newHttpHeaders([("Content-Type","application/json")]))
+  ##
+  ## ## Example
+  ## .. code-block:: nim
+  ##
+  ##    await request.sendJson(%{"response": "error", "msg": "oops :("})
   result = newCall(
     "respond",
     request,
@@ -461,7 +502,13 @@ macro sendJson*(request, message: untyped, http_code = Http200): untyped =
 
 macro start*(server: ServerRef): untyped =
   ## Starts server.
+  ##
+  ## ## Example
+  ## .. code-block:: nim
+  ##
+  ##    let server = newServer()
+  ##    server.start()
   result = quote do:
-    if AKANE_DEBUG_MODE:
-      echo "Server starts on http://", `server`.address, ":", `server`.port
+    when defined(debug):
+      debug("Server starts on http://", `server`.address, ":", `server`.port)
     waitFor `server`.server.serve(Port(`server`.port), receivepages, `server`.address)
