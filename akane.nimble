@@ -1,7 +1,7 @@
 [Package]
 name = "akane"
 author = "Ethosa"
-version = "0.1.0"
+version = "0.1.1"
 description = "The Nim asynchronous web framework."
 license = "MIT"
 srcDir = "akane"
