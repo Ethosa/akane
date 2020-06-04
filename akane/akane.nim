@@ -314,7 +314,8 @@ macro pages*(server: ServerRef, body: untyped): untyped =
     if (i.kind == nnkCall and
         (path.kind == nnkStrLit or path.kind == nnkCallStrLit or path.kind == nnkEmpty) and
         slist.kind == nnkStmtList):
-      if current == "equals":
+      case current
+      of "equals":
         slist.insert(0,  # let url: string = `path`
           newNimNode(nnkLetSection).add(
             newNimNode(nnkIdentDefs).add(
@@ -328,7 +329,7 @@ macro pages*(server: ServerRef, body: untyped): untyped =
             slist
           )
         )
-      elif current == "startswith":
+      of "startswith":
         slist.insert(0,  # let url = decoded_url[`path`.len..^1]
           newNimNode(nnkLetSection).add(
             newNimNode(nnkIdentDefs).add(
@@ -348,7 +349,7 @@ macro pages*(server: ServerRef, body: untyped): untyped =
             slist
             )
           )
-      elif current == "endswith":
+      of "endswith":
         slist.insert(0,  # let url: string = decoded_url[0..^`path`.len]
           newNimNode(nnkLetSection).add(
             newNimNode(nnkIdentDefs).add(
@@ -370,7 +371,7 @@ macro pages*(server: ServerRef, body: untyped): untyped =
             slist
           )
         )
-      elif current == "regex":
+      of "regex":
         slist.insert(0,  # discard match(decoded_url, `path`, url)
             newNimNode(nnkDiscardStmt).add(
               newCall("match", ident("decoded_url"), path, ident("url"))
@@ -390,9 +391,11 @@ macro pages*(server: ServerRef, body: untyped): untyped =
           newNimNode(nnkElifBranch).add(
             newCall("match", ident("decoded_url"), path),
             slist))
-      elif current == "notfound":
+      of "notfound":
         notfound_declaration = true
         ifstmtlist.add(newNimNode(nnkElse).add(slist))
+      else:
+        discard
 
   if not notfound_declaration:
     ifstmtlist.add(
@@ -424,6 +427,23 @@ macro pages*(server: ServerRef, body: untyped): untyped =
     stmtlist)
 
 
+macro send*(request, message: untyped, http_code = Http200,
+             headers: HttpHeaders = newHttpHeaders()): untyped =
+  ## Responds from server with utf-8.
+  ##
+  ## Translates to
+  ##
+  ## .. code-block:: nim
+  ##
+  ##    request.respond(Http200, message, headers)
+  ##
+  ## ## Example
+  ## .. code-block:: nim
+  ##
+  ##    await request.send("hello!")
+  result = newCall("respond", request, http_code, message, headers)
+
+
 macro answer*(request, message: untyped, http_code = Http200,
              headers: HttpHeaders = newHttpHeaders()): untyped =
   ## Responds from server with utf-8.
@@ -432,7 +452,7 @@ macro answer*(request, message: untyped, http_code = Http200,
   ##
   ## .. code-block:: nim
   ##
-  ##    request.respond(Http200, "<head><meta charset='utf-8'></head>" & message)
+  ##    request.respond(Http200, "<head><meta charset='utf-8'></head>" & message, headers)
   ##
   ## ## Example
   ## .. code-block:: nim
@@ -482,7 +502,7 @@ macro sendJson*(request, message: untyped, http_code = Http200): untyped =
   ## ## Example
   ## .. code-block:: nim
   ##
-  ##    await request.sendJson(%{"response": "error", "msg": "oops :("})
+  ##    await request.sendJson(%*{"response": "error", "msg": "oops :("})
   result = newCall(
     "respond",
     request,
@@ -494,6 +514,36 @@ macro sendJson*(request, message: untyped, http_code = Http200): untyped =
         newNimNode(nnkPar).add(
           newLit("Content-Type"),
           newLit("application/json")
+        )
+      )
+    )
+  )
+
+
+macro sendPlaintext*(request, message: untyped, http_code = Http200): untyped =
+  ## Sends JsonNode with "Content-Type": "application/json" in headers.
+  ##
+  ## Translates to
+  ##
+  ## .. code-block:: nim
+  ##
+  ##    request.respond(Http200, $message, newHttpHeaders([("Content-Type","plain/text")]))
+  ##
+  ## ## Example
+  ## .. code-block:: nim
+  ##
+  ##    await request.sendPlaintext(%*{"response": "error", "msg": "oops :("})
+  result = newCall(
+    "respond",
+    request,
+    http_code,
+    newCall("$", message),
+    newCall(
+      "newHttpHeaders",
+      newNimNode(nnkBracket).add(
+        newNimNode(nnkPar).add(
+          newLit("Content-Type"),
+          newLit("plain/text")
         )
       )
     )

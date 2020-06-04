@@ -8,19 +8,19 @@ proc main {.gcsafe.} =
   server.pages:
     "/":  # http://127.0.0.1:5000/
       if request.reqMethod == HttpGet:
-        await request.answer("")
+        await request.sendPlaintext("")
       else:
         await request.error("not GET :(")
 
     "/user":  # http://127.0.0.1:5000/user
       if request.reqMethod == HttpGet:
-        await request.answer("")
+        await request.sendPlaintext("")
       else:
         await request.error("not GET :(")
 
     regex(re"\A/user/id(\d+)\Z"):  # http://127.0.0.1:5000/user/id123456 -> {"id": 123456}
       if request.reqMethod == HttpPost:
-        await request.sendJson(%*{"id": url[0]})
+        await request.sendPlaintext(%*{"id": url[0]})
       else:
         await request.error("not POST :(")
 

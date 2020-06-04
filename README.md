@@ -6,8 +6,8 @@
 [![License](https://img.shields.io/github/license/Ethosa/akane)](https://github.com/Ethosa/akane/blob/master/LICENSE)
 [![test](https://github.com/Ethosa/akane/workflows/test/badge.svg)](https://github.com/Ethosa/akane/actions)
 
-<h4>Latest version - 0.1.2</h4>
-<h4>Stable version - 0.1.2</h4>
+<h4>Latest version - 0.1.3</h4>
+<h4>Stable version - 0.1.3</h4>
 </div>
 
 ## Install
