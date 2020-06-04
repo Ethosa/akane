@@ -10,10 +10,14 @@ validatePassword	akane.html#validatePassword,string,string	akane: validatePasswo
 newCookie	akane.html#newCookie,ServerRef,string,string,string	akane: newCookie(server: ServerRef; key, value: string; domain = &quot;&quot;): HttpHeaders	
 pages	akane.html#pages.m,ServerRef,untyped	akane: pages(server: ServerRef; body: untyped): untyped	
 Example	akane.html#example	  Example	
+send	akane.html#send.m,untyped,untyped,HttpHeaders	akane: send(request, message: untyped; http_code = Http200;\n     headers: HttpHeaders = newHttpHeaders()): untyped	
+Example	akane.html#example	  Example	
 answer	akane.html#answer.m,untyped,untyped,HttpHeaders	akane: answer(request, message: untyped; http_code = Http200;\n       headers: HttpHeaders = newHttpHeaders()): untyped	
 Example	akane.html#example	  Example	
 error	akane.html#error.m,untyped,untyped,HttpHeaders	akane: error(request, message: untyped; http_code = Http404;\n      headers: HttpHeaders = newHttpHeaders()): untyped	
 Example	akane.html#example	  Example	
 sendJson	akane.html#sendJson.m,untyped,untyped	akane: sendJson(request, message: untyped; http_code = Http200): untyped	
+Example	akane.html#example	  Example	
+sendPlaintext	akane.html#sendPlaintext.m,untyped,untyped	akane: sendPlaintext(request, message: untyped; http_code = Http200): untyped	
 Example	akane.html#example	  Example	
 start	akane.html#start.m,ServerRef	akane: start(server: ServerRef): untyped	

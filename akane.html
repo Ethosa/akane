@@ -104,6 +104,8 @@ function main() {
 <li><a class="reference" id="example_toc" href="#example">Example</a></li>
 <li><a class="reference" id="example_toc" href="#example">Example</a></li>
 <li><a class="reference" id="example_toc" href="#example">Example</a></li>
+<li><a class="reference" id="example_toc" href="#example">Example</a></li>
+<li><a class="reference" id="example_toc" href="#example">Example</a></li>
 </ul><li>
   <a class="reference reference-toplevel" href="#7" id="57">Types</a>
   <ul class="simple simple-toc-section">
@@ -138,6 +140,9 @@ function main() {
   <ul class="simple simple-toc-section">
       <li><a class="reference" href="#pages.m%2CServerRef%2Cuntyped"
     title="pages(server: ServerRef; body: untyped): untyped"><wbr />pages<span class="attachedType">ServerRef</span></a></li>
+  <li><a class="reference" href="#send.m%2Cuntyped%2Cuntyped%2CHttpHeaders"
+    title="send(request, message: untyped; http_code = Http200;
+     headers: HttpHeaders = newHttpHeaders()): untyped"><wbr />send<span class="attachedType"></span></a></li>
   <li><a class="reference" href="#answer.m%2Cuntyped%2Cuntyped%2CHttpHeaders"
     title="answer(request, message: untyped; http_code = Http200;
        headers: HttpHeaders = newHttpHeaders()): untyped"><wbr />answer<span class="attachedType"></span></a></li>
@@ -146,6 +151,8 @@ function main() {
       headers: HttpHeaders = newHttpHeaders()): untyped"><wbr />error<span class="attachedType"></span></a></li>
   <li><a class="reference" href="#sendJson.m%2Cuntyped%2Cuntyped"
     title="sendJson(request, message: untyped; http_code = Http200): untyped"><wbr />send<wbr />Json<span class="attachedType"></span></a></li>
+  <li><a class="reference" href="#sendPlaintext.m%2Cuntyped%2Cuntyped"
+    title="sendPlaintext(request, message: untyped; http_code = Http200): untyped"><wbr />send<wbr />Plaintext<span class="attachedType"></span></a></li>
   <li><a class="reference" href="#start.m%2CServerRef"
     title="start(server: ServerRef): untyped"><wbr />start<span class="attachedType">ServerRef</span></a></li>
 
@@ -315,6 +322,17 @@ Decodes query.<dl class="docutils"><dt>e.g.:</dt>
     <span class="Identifier">await</span> <span class="Identifier">request</span><span class="Other">.</span><span class="Identifier">answer</span><span class="Other">(</span><span class="StringLit">&quot;Hello, world&quot;</span><span class="Other">)</span></pre>
 
 </dd>
+<a id="send.m,untyped,untyped,HttpHeaders"></a>
+<dt><pre><span class="Keyword">macro</span> <a href="#send.m%2Cuntyped%2Cuntyped%2CHttpHeaders"><span class="Identifier">send</span></a><span class="Other">(</span><span class="Identifier">request</span><span class="Other">,</span> <span class="Identifier">message</span><span class="Other">:</span> <span class="Identifier">untyped</span><span class="Other">;</span> <span class="Identifier">http_code</span> <span class="Other">=</span> <span class="Identifier">Http200</span><span class="Other">;</span>
+          <span class="Identifier">headers</span><span class="Other">:</span> <span class="Identifier">HttpHeaders</span> <span class="Other">=</span> <span class="Identifier">newHttpHeaders</span><span class="Other">(</span><span class="Other">)</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">untyped</span></pre></dt>
+<dd>
+
+<p>Responds from server with utf-8.</p>
+<p>Translates to</p>
+<pre class="listing"><span class="Identifier">request</span><span class="Operator">.</span><span class="Identifier">respond</span><span class="Punctuation">(</span><span class="Identifier">Http200</span><span class="Punctuation">,</span> <span class="Identifier">message</span><span class="Punctuation">,</span> <span class="Identifier">headers</span><span class="Punctuation">)</span></pre>
+<h2><a class="toc-backref" id="example" href="#example">Example</a></h2><pre class="listing"><span class="Identifier">await</span> <span class="Identifier">request</span><span class="Operator">.</span><span class="Identifier">send</span><span class="Punctuation">(</span><span class="StringLit">&quot;hello!&quot;</span><span class="Punctuation">)</span></pre>
+
+</dd>
 <a id="answer.m,untyped,untyped,HttpHeaders"></a>
 <dt><pre><span class="Keyword">macro</span> <a href="#answer.m%2Cuntyped%2Cuntyped%2CHttpHeaders"><span class="Identifier">answer</span></a><span class="Other">(</span><span class="Identifier">request</span><span class="Other">,</span> <span class="Identifier">message</span><span class="Other">:</span> <span class="Identifier">untyped</span><span class="Other">;</span> <span class="Identifier">http_code</span> <span class="Other">=</span> <span class="Identifier">Http200</span><span class="Other">;</span>
             <span class="Identifier">headers</span><span class="Other">:</span> <span class="Identifier">HttpHeaders</span> <span class="Other">=</span> <span class="Identifier">newHttpHeaders</span><span class="Other">(</span><span class="Other">)</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">untyped</span></pre></dt>
@@ -322,7 +340,7 @@ Decodes query.<dl class="docutils"><dt>e.g.:</dt>
 
 <p>Responds from server with utf-8.</p>
 <p>Translates to</p>
-<pre class="listing"><span class="Identifier">request</span><span class="Operator">.</span><span class="Identifier">respond</span><span class="Punctuation">(</span><span class="Identifier">Http200</span><span class="Punctuation">,</span> <span class="StringLit">&quot;&lt;head&gt;&lt;meta charset='utf-8'&gt;&lt;/head&gt;&quot;</span> <span class="Operator">&amp;</span> <span class="Identifier">message</span><span class="Punctuation">)</span></pre>
+<pre class="listing"><span class="Identifier">request</span><span class="Operator">.</span><span class="Identifier">respond</span><span class="Punctuation">(</span><span class="Identifier">Http200</span><span class="Punctuation">,</span> <span class="StringLit">&quot;&lt;head&gt;&lt;meta charset='utf-8'&gt;&lt;/head&gt;&quot;</span> <span class="Operator">&amp;</span> <span class="Identifier">message</span><span class="Punctuation">,</span> <span class="Identifier">headers</span><span class="Punctuation">)</span></pre>
 <h2><a class="toc-backref" id="example" href="#example">Example</a></h2><pre class="listing"><span class="Identifier">await</span> <span class="Identifier">request</span><span class="Operator">.</span><span class="Identifier">answer</span><span class="Punctuation">(</span><span class="StringLit">&quot;hello!&quot;</span><span class="Punctuation">)</span></pre>
 
 </dd>
@@ -344,7 +362,17 @@ Decodes query.<dl class="docutils"><dt>e.g.:</dt>
 <p>Sends JsonNode with &quot;Content-Type&quot;: &quot;application/json&quot; in headers.</p>
 <p>Translates to</p>
 <pre class="listing"><span class="Identifier">request</span><span class="Operator">.</span><span class="Identifier">respond</span><span class="Punctuation">(</span><span class="Identifier">Http200</span><span class="Punctuation">,</span> <span class="Operator">$</span><span class="Identifier">message</span><span class="Punctuation">,</span> <span class="Identifier">newHttpHeaders</span><span class="Punctuation">(</span><span class="Punctuation">[</span><span class="Punctuation">(</span><span class="StringLit">&quot;Content-Type&quot;</span><span class="Punctuation">,</span><span class="StringLit">&quot;application/json&quot;</span><span class="Punctuation">)</span><span class="Punctuation">]</span><span class="Punctuation">)</span><span class="Punctuation">)</span></pre>
-<h2><a class="toc-backref" id="example" href="#example">Example</a></h2><pre class="listing"><span class="Identifier">await</span> <span class="Identifier">request</span><span class="Operator">.</span><span class="Identifier">sendJson</span><span class="Punctuation">(</span><span class="Operator">%</span><span class="Punctuation">{</span><span class="StringLit">&quot;response&quot;</span><span class="Punctuation">:</span> <span class="StringLit">&quot;error&quot;</span><span class="Punctuation">,</span> <span class="StringLit">&quot;msg&quot;</span><span class="Punctuation">:</span> <span class="StringLit">&quot;oops :(&quot;</span><span class="Punctuation">}</span><span class="Punctuation">)</span></pre>
+<h2><a class="toc-backref" id="example" href="#example">Example</a></h2><pre class="listing"><span class="Identifier">await</span> <span class="Identifier">request</span><span class="Operator">.</span><span class="Identifier">sendJson</span><span class="Punctuation">(</span><span class="Operator">%*</span><span class="Punctuation">{</span><span class="StringLit">&quot;response&quot;</span><span class="Punctuation">:</span> <span class="StringLit">&quot;error&quot;</span><span class="Punctuation">,</span> <span class="StringLit">&quot;msg&quot;</span><span class="Punctuation">:</span> <span class="StringLit">&quot;oops :(&quot;</span><span class="Punctuation">}</span><span class="Punctuation">)</span></pre>
+
+</dd>
+<a id="sendPlaintext.m,untyped,untyped"></a>
+<dt><pre><span class="Keyword">macro</span> <a href="#sendPlaintext.m%2Cuntyped%2Cuntyped"><span class="Identifier">sendPlaintext</span></a><span class="Other">(</span><span class="Identifier">request</span><span class="Other">,</span> <span class="Identifier">message</span><span class="Other">:</span> <span class="Identifier">untyped</span><span class="Other">;</span> <span class="Identifier">http_code</span> <span class="Other">=</span> <span class="Identifier">Http200</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">untyped</span></pre></dt>
+<dd>
+
+<p>Sends JsonNode with &quot;Content-Type&quot;: &quot;application/json&quot; in headers.</p>
+<p>Translates to</p>
+<pre class="listing"><span class="Identifier">request</span><span class="Operator">.</span><span class="Identifier">respond</span><span class="Punctuation">(</span><span class="Identifier">Http200</span><span class="Punctuation">,</span> <span class="Operator">$</span><span class="Identifier">message</span><span class="Punctuation">,</span> <span class="Identifier">newHttpHeaders</span><span class="Punctuation">(</span><span class="Punctuation">[</span><span class="Punctuation">(</span><span class="StringLit">&quot;Content-Type&quot;</span><span class="Punctuation">,</span><span class="StringLit">&quot;plain/text&quot;</span><span class="Punctuation">)</span><span class="Punctuation">]</span><span class="Punctuation">)</span><span class="Punctuation">)</span></pre>
+<h2><a class="toc-backref" id="example" href="#example">Example</a></h2><pre class="listing"><span class="Identifier">await</span> <span class="Identifier">request</span><span class="Operator">.</span><span class="Identifier">sendPlaintext</span><span class="Punctuation">(</span><span class="Operator">%*</span><span class="Punctuation">{</span><span class="StringLit">&quot;response&quot;</span><span class="Punctuation">:</span> <span class="StringLit">&quot;error&quot;</span><span class="Punctuation">,</span> <span class="StringLit">&quot;msg&quot;</span><span class="Punctuation">:</span> <span class="StringLit">&quot;oops :(&quot;</span><span class="Punctuation">}</span><span class="Punctuation">)</span></pre>
 
 </dd>
 <a id="start.m,ServerRef"></a>
@@ -366,7 +394,7 @@ Starts server.
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2020-06-04 11:23:21 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2020-06-04 14:53:52 UTC</small>
       </div>
     </div>
   </div>
