@@ -435,13 +435,13 @@ macro send*(request, message: untyped, http_code = Http200,
   ##
   ## .. code-block:: nim
   ##
-  ##    request.respond(Http200, message, headers)
+  ##    request.respond(Http200, $message, headers)
   ##
   ## ## Example
   ## .. code-block:: nim
   ##
   ##    await request.send("hello!")
-  result = newCall("respond", request, http_code, message, headers)
+  result = newCall("respond", request, http_code, newCall("$", message), headers)
 
 
 macro answer*(request, message: untyped, http_code = Http200,
@@ -503,21 +503,8 @@ macro sendJson*(request, message: untyped, http_code = Http200): untyped =
   ## .. code-block:: nim
   ##
   ##    await request.sendJson(%*{"response": "error", "msg": "oops :("})
-  result = newCall(
-    "respond",
-    request,
-    http_code,
-    newCall("$", message),
-    newCall(
-      "newHttpHeaders",
-      newNimNode(nnkBracket).add(
-        newNimNode(nnkPar).add(
-          newLit("Content-Type"),
-          newLit("application/json")
-        )
-      )
-    )
-  )
+  quote do:
+    `request`.respond(`http_code`, $`message`, newHttpHeaders([("Content-Type","application/json")]))
 
 
 macro sendPlaintext*(request, message: untyped, http_code = Http200): untyped =
@@ -533,21 +520,8 @@ macro sendPlaintext*(request, message: untyped, http_code = Http200): untyped =
   ## .. code-block:: nim
   ##
   ##    await request.sendPlaintext(%*{"response": "error", "msg": "oops :("})
-  result = newCall(
-    "respond",
-    request,
-    http_code,
-    newCall("$", message),
-    newCall(
-      "newHttpHeaders",
-      newNimNode(nnkBracket).add(
-        newNimNode(nnkPar).add(
-          newLit("Content-Type"),
-          newLit("plain/text")
-        )
-      )
-    )
-  )
+  quote do:
+    `request`.respond(`http_code`, $`message`, newHttpHeaders([("Content-Type","plain/text")]))
 
 
 macro start*(server: ServerRef): untyped =
