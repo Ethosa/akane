@@ -430,6 +430,7 @@ macro pages*(server: ServerRef, body: untyped): untyped =
 macro send*(request, message: untyped, http_code = Http200,
              headers: HttpHeaders = newHttpHeaders()): untyped =
   ## Responds from server with utf-8.
+  ## Note: Content-length does not send automatically.
   ##
   ## Translates to
   ##
@@ -447,6 +448,7 @@ macro send*(request, message: untyped, http_code = Http200,
 macro answer*(request, message: untyped, http_code = Http200,
              headers: HttpHeaders = newHttpHeaders()): untyped =
   ## Responds from server with utf-8.
+  ## Note: Content-length does not send automatically.
   ##
   ## Translates to
   ##
@@ -470,6 +472,7 @@ macro answer*(request, message: untyped, http_code = Http200,
 macro error*(request, message: untyped, http_code = Http404,
              headers: HttpHeaders = newHttpHeaders()): untyped =
   ## Responds from server with utf-8.
+  ## Note: Content-length not automatically sends.
   ##
   ## Translates to
   ##
@@ -492,6 +495,7 @@ macro error*(request, message: untyped, http_code = Http404,
 
 macro sendJson*(request, message: untyped, http_code = Http200): untyped =
   ## Sends JsonNode with "Content-Type": "application/json" in headers.
+  ## Note: Content-length does send automatically.
   ##
   ## Translates to
   ##
@@ -504,11 +508,16 @@ macro sendJson*(request, message: untyped, http_code = Http200): untyped =
   ##
   ##    await request.sendJson(%*{"response": "error", "msg": "oops :("})
   quote do:
-    `request`.respond(`http_code`, $`message`, newHttpHeaders([("Content-Type","application/json")]))
+    `request`.respond(
+      `http_code`, $`message`, newHttpHeaders([
+        ("Content-Type","application/json"),
+        ("Content-length", len($`message`))
+      ]))
 
 
 macro sendPlaintext*(request, message: untyped, http_code = Http200): untyped =
   ## Sends JsonNode with "Content-Type": "application/json" in headers.
+  ## Note: Content-length does send automatically.
   ##
   ## Translates to
   ##
@@ -521,7 +530,10 @@ macro sendPlaintext*(request, message: untyped, http_code = Http200): untyped =
   ##
   ##    await request.sendPlaintext(%*{"response": "error", "msg": "oops :("})
   quote do:
-    `request`.respond(`http_code`, $`message`, newHttpHeaders([("Content-Type","plain/text")]))
+    `request`.respond(`http_code`, $`message`, newHttpHeaders([
+      ("Content-Type","plain/text"),
+      ("Content-length", len($`message`))
+    ]))
 
 
 macro start*(server: ServerRef): untyped =
