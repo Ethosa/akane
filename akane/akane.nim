@@ -493,7 +493,7 @@ macro sendJson*(request, message: untyped, http_code = Http200): untyped =
     `request`.respond(
       `http_code`, $`message`, newHttpHeaders([
         ("Content-Type","application/json"),
-        ("Content-length", len($`message`))
+        ("Content-length", $(len($`message`)))
       ]))
 
 
@@ -514,7 +514,7 @@ macro sendPlaintext*(request, message: untyped, http_code = Http200): untyped =
   quote do:
     `request`.respond(`http_code`, $`message`, newHttpHeaders([
       ("Content-Type","plain/text"),
-      ("Content-length", len($`message`))
+      ("Content-length", $(len($`message`)))
     ]))
 
 
