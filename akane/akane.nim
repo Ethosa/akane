@@ -1,30 +1,33 @@
 # author: Ethosa
 # ----- CORE ----- #
-import asyncdispatch
-import asynchttpserver
-import macros
+import
+  asyncdispatch,
+  asynchttpserver,
+  macros
 
 # ----- SUPPORT ----- #
-import asyncfile  # loadtemplate
-import strutils  # startsWith, endsWith
-import strtabs
-import cookies
-import tables
-import json  # urlParams
-import uri  # decodeUrl
-import std/sha1  # sha1 passwords.
-import os
-import re  # regex
+import
+  asyncfile,  # loadtemplate
+  strutils,  # startsWith, endsWith
+  strtabs,
+  cookies,
+  tables,
+  json,  # urlParams
+  uri,  # decodeUrl
+  std/sha1,  # sha1 passwords.
+  os,
+  re  # regex
 
 # ----- EXPORT -----
-export asyncdispatch
-export asynchttpserver
-export strutils
-export cookies
-export strtabs
-export json
-export uri
-export re
+export
+  asyncdispatch,
+  asynchttpserver,
+  strutils,
+  cookies,
+  strtabs,
+  json,
+  uri,
+  re
 
 
 when defined(debug):
@@ -317,11 +320,7 @@ macro pages*(server: ServerRef, body: untyped): untyped =
       case current
       of "equals":
         slist.insert(0,  # let url: string = `path`
-          newNimNode(nnkLetSection).add(
-            newNimNode(nnkIdentDefs).add(
-              ident("url"), ident("string"), path
-            )
-          )
+          newLetStmt(ident("url"), path)
         )
         ifstmtlist.add(  # decoded_url == `path`
           newNimNode(nnkElifBranch).add(
@@ -331,16 +330,9 @@ macro pages*(server: ServerRef, body: untyped): untyped =
         )
       of "startswith":
         slist.insert(0,  # let url = decoded_url[`path`.len..^1]
-          newNimNode(nnkLetSection).add(
-            newNimNode(nnkIdentDefs).add(
-              ident("url"),
-              ident("string"),
-              newCall(
-                "[]",
-                ident("decoded_url"),
-                newCall("..^", newCall("len", path), newLit(1))
-              )
-            )
+          newLetStmt(
+            ident("url"),
+            newCall("[]", ident("decoded_url"), newCall("..^", newCall("len", path), newLit(1)))
           )
         )
         ifstmtlist.add(  # decode_url.startsWith(`path`)
@@ -351,18 +343,9 @@ macro pages*(server: ServerRef, body: untyped): untyped =
           )
       of "endswith":
         slist.insert(0,  # let url: string = decoded_url[0..^`path`.len]
-          newNimNode(nnkLetSection).add(
-            newNimNode(nnkIdentDefs).add(
-              ident("url"),
-              ident("string"),
-              newCall(
-                "[]",
-                ident("decoded_url"),
-                newCall(
-                  "..^", newLit(0), newCall("+", newLit(1), newCall("len", path))
-                )
-              )
-            )
+          newLetStmt(
+            ident("url"),
+            newCall("[]", ident("decoded_url"), newCall("..^", newLit(0), newCall("+", newLit(1), newCall("len", path))))
           )
         )
         ifstmtlist.add(  # decode_url.endsWith(`path`)
@@ -401,8 +384,7 @@ macro pages*(server: ServerRef, body: untyped): untyped =
     ifstmtlist.add(
       newNimNode(nnkElse).add(
         newCall(  # await request.respond(Http404, "Not found")
-          "await",
-          newCall("respond", ident("request"), ident("Http404"), newLit("Not found"))
+          "await", newCall("respond", ident("request"), ident("Http404"), newLit("Not found"))
         )
       )
     )
