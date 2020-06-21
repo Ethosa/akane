@@ -1,5 +1,7 @@
 Simple usage	akane.html#simple-usage	  Simple usage	
 ServerRef	akane.html#ServerRef	akane: ServerRef	
+AnyHttpMethod	akane.html#AnyHttpMethod	akane: AnyHttpMethod	
+BaseHttpMethod	akane.html#BaseHttpMethod	akane: BaseHttpMethod	
 Example	akane.html#example	  Example	
 newServer	akane.html#newServer,string,uint16	akane: newServer(address: string = &quot;127.0.0.1&quot;; port: uint16 = 5000): ServerRef	
 Example	akane.html#example	  Example	
