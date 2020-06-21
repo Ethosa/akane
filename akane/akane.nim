@@ -65,6 +65,11 @@ type
     server*: AsyncHttpServer
 
 
+const
+  AnyHttpMethod* = [HttpHead, HttpGet, HttpPost, HttpPut, HttpDelete, HttpTrace, HttpOptions, HttpConnect, HttpPatch]
+  BaseHttpMethod* = [HttpHead, HttpGet, HttpPost, HttpPut, HttpDelete]
+
+
 # ---------- PRIVATE ---------- #
 proc toStr(node: JsonNode): Future[string] {.async.} =
   if node.kind == JString:
@@ -310,11 +315,24 @@ macro pages*(server: ServerRef, body: untyped): untyped =
   var ifstmtlist = stmtlist[1]
 
   for i in body:  # for each page in statment list.
-    let
-      current = if i.len == 3: $i[0] else: "equals"
-      path = if i.len == 3: i[1] else: i[0]
-      slist = if i.len == 3: i[2] else: i[1]
-    if (i.kind == nnkCall and
+    var j = i
+    if j.len() == 3:
+      j = newCall(j[0], j[1], ident("BaseHttpMethod"), j[2])
+    elif j.len() == 2:
+      j = newCall("equals", j[0], ident("BaseHttpMethod"), j[1])
+    var
+      current = $j[0]
+      path = j[1]
+      reqmethods: NimNode
+      slist = j[3]
+    if j.kind == nnkBracket:
+      reqmethods = j[2]
+    elif j[2].kind == nnkIdent and $(j[2]) notin ["AnyHttpMethod", "BaseHttpMethod"]:
+      reqmethods = newNimNode(nnkBracket)
+      reqmethods.add(j[2])
+    elif j[2].kind == nnkIdent:
+      reqmethods = j[2]
+    if (j.kind == nnkCall and
         (path.kind == nnkStrLit or path.kind == nnkCallStrLit or path.kind == nnkEmpty) and
         slist.kind == nnkStmtList):
       case current
@@ -324,7 +342,7 @@ macro pages*(server: ServerRef, body: untyped): untyped =
         )
         ifstmtlist.add(  # decoded_url == `path`
           newNimNode(nnkElifBranch).add(
-            newCall("==", path, ident("decoded_url")),
+            newCall("and", newCall("==", path, ident("decoded_url")), newCall("contains", reqmethods, newDotExpr(ident"request", ident"reqMethod"))),
             slist
           )
         )
@@ -337,7 +355,7 @@ macro pages*(server: ServerRef, body: untyped): untyped =
         )
         ifstmtlist.add(  # decode_url.startsWith(`path`)
           newNimNode(nnkElifBranch).add(
-            newCall("startsWith", ident("decoded_url"), path),
+            newCall("and", newCall("startsWith", ident("decoded_url"), path), newCall("contains", reqmethods, newDotExpr(ident"request", ident"reqMethod"))),
             slist
             )
           )
@@ -350,7 +368,7 @@ macro pages*(server: ServerRef, body: untyped): untyped =
         )
         ifstmtlist.add(  # decode_url.endsWith(`path`)
           newNimNode(nnkElifBranch).add(
-            newCall("endsWith", ident("decoded_url"), path),
+            newCall("and", newCall("endsWith", ident("decoded_url"), path), newCall("contains", reqmethods, newDotExpr(ident"request", ident"reqMethod"))),
             slist
           )
         )
@@ -372,7 +390,7 @@ macro pages*(server: ServerRef, body: untyped): untyped =
           ))
         ifstmtlist.add(  # decode_url.match(`path`)
           newNimNode(nnkElifBranch).add(
-            newCall("match", ident("decoded_url"), path),
+            newCall("and", newCall("match", ident("decoded_url"), path), newCall("contains", reqmethods, newDotExpr(ident"request", ident"reqMethod"))),
             slist))
       of "notfound":
         notfound_declaration = true

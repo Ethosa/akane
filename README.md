@@ -6,8 +6,8 @@
 [![License](https://img.shields.io/github/license/Ethosa/akane)](https://github.com/Ethosa/akane/blob/master/LICENSE)
 [![test](https://github.com/Ethosa/akane/workflows/test/badge.svg)](https://github.com/Ethosa/akane/actions)
 
-<h4>Latest version - 0.1.6</h4>
-<h4>Stable version - 0.1.6</h4>
+<h4>Latest version - 0.1.7</h4>
+<h4>Stable version - 0.1.7</h4>
 </div>
 
 ## Install
@@ -19,6 +19,7 @@
 -   Pages with URL handling methods: `equals`, `startswith`, `endswith`, `regex`,`notfound`;
 -   `templates` folder;
 -   Only the standard library used;
+-   YML-like pages syntax;
 -   Debug mode;
 -   Password hashing;
 -   Working with cookies;
@@ -34,6 +35,9 @@
           # You also can write "/" instead of equals("/")
           # type of `request` is a Request.
           await request.answer("Hello, world!")  # utf-8 encoded message.
+
+        equals("/getme", HttpGet):
+          await request.answer("You can see it only on GET method! :)")
 
       server.start()
     main()
