@@ -130,6 +130,11 @@ function main() {
     title="newServer(address: string = &quot;127.0.0.1&quot;; port: uint16 = 5000): ServerRef">newServer,<wbr>string,<wbr>uint16</a></li>
 
   </ul>
+  <ul class="simple nested-toc-section">validatePassword
+      <li><a class="reference" href="#validatePassword%2Cstring%2Cstring"
+    title="validatePassword(password, hashpassword: string): Future[bool]">validatePassword,<wbr>string,<wbr>string</a></li>
+
+  </ul>
   <ul class="simple nested-toc-section">parseQuery
       <li><a class="reference" href="#parseQuery%2CRequest"
     title="parseQuery(request: Request): Future[JsonNode]">parseQuery,<wbr>Request</a></li>
@@ -143,6 +148,11 @@ function main() {
   <ul class="simple nested-toc-section">newCookie
       <li><a class="reference" href="#newCookie%2CServerRef%2Cstring%2Cstring%2Cstring"
     title="newCookie(server: ServerRef; key, value: string; domain = &quot;&quot;): HttpHeaders">newCookie,<wbr>ServerRef,<wbr>string,<wbr>string,<wbr>string</a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">password2hash
+      <li><a class="reference" href="#password2hash%2Cstring"
+    title="password2hash(password: string): Future[string]">password2hash,<wbr>string</a></li>
 
   </ul>
 
@@ -288,6 +298,33 @@ Decodes query.<dl class="docutils"><dt>e.g.:</dt>
 
 
 </dd>
+<a id="password2hash,string"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#password2hash%2Cstring"><span class="Identifier">password2hash</span></a><span class="Other">(</span><span class="Identifier">password</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">Future</span><span class="Other">[</span><span class="Identifier">string</span><span class="Other">]</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">inline</span><span class="Other">,</span>
+    <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dd>
+
+<p>Generates a sha1 from <tt class="docutils literal"><span class="pre">password</span></tt>.</p>
+<p>Arguments:</p>
+<ul class="simple"><li><tt class="docutils literal"><span class="pre">password</span></tt> is an user password.</li>
+</ul>
+<p>WARNING! It's works only with <tt class="docutils literal"><span class="pre">-d:tools</span></tt>.</p>
+
+
+</dd>
+<a id="validatePassword,string,string"></a>
+<dt><pre><span class="Keyword">proc</span> <a href="#validatePassword%2Cstring%2Cstring"><span class="Identifier">validatePassword</span></a><span class="Other">(</span><span class="Identifier">password</span><span class="Other">,</span> <span class="Identifier">hashpassword</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">Future</span><span class="Other">[</span><span class="Identifier">bool</span><span class="Other">]</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">inline</span><span class="Other">,</span>
+    <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dd>
+
+<p>Validates the password and returns true, if the password is valid.</p>
+<p>Arguments:</p>
+<ul class="simple"><li><tt class="docutils literal"><span class="pre">password</span></tt> is a got password from user input.</li>
+<li><tt class="docutils literal"><span class="pre">hashpassword</span></tt> is a response from <a class="reference external" href="#password2hash,string">password2hash proc</a></li>
+</ul>
+<p>WARNING! It's works only with <tt class="docutils literal"><span class="pre">-d:tools</span></tt>.</p>
+
+
+</dd>
 
 </dl></div>
 <div class="section" id="17">
@@ -403,7 +440,7 @@ Starts server.
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2021-07-05 10:52:38 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2021-07-05 11:02:02 UTC</small>
       </div>
     </div>
   </div>

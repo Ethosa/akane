@@ -8,6 +8,8 @@ Example	akane.html#example	  Example
 loadtemplate	akane.html#loadtemplate,string,JsonNode	akane: loadtemplate(name: string; json: JsonNode = %*{}): Future[string]	
 parseQuery	akane.html#parseQuery,Request	akane: parseQuery(request: Request): Future[JsonNode]	
 newCookie	akane.html#newCookie,ServerRef,string,string,string	akane: newCookie(server: ServerRef; key, value: string; domain = &quot;&quot;): HttpHeaders	
+password2hash	akane.html#password2hash,string	akane: password2hash(password: string): Future[string]	
+validatePassword	akane.html#validatePassword,string,string	akane: validatePassword(password, hashpassword: string): Future[bool]	
 pages	akane.html#pages.m,ServerRef,untyped	akane: pages(server: ServerRef; body: untyped): untyped	
 Example	akane.html#example	  Example	
 send	akane.html#send.m,untyped,untyped,HttpHeaders	akane: send(request, message: untyped; http_code = Http200;\n     headers: HttpHeaders = newHttpHeaders()): untyped	
