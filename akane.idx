@@ -7,8 +7,6 @@ newServer	akane.html#newServer,string,uint16	akane: newServer(address: string = 
 Example	akane.html#example	  Example	
 loadtemplate	akane.html#loadtemplate,string,JsonNode	akane: loadtemplate(name: string; json: JsonNode = %*{}): Future[string]	
 parseQuery	akane.html#parseQuery,Request	akane: parseQuery(request: Request): Future[JsonNode]	
-password2hash	akane.html#password2hash,string	akane: password2hash(password: string): Future[string]	
-validatePassword	akane.html#validatePassword,string,string	akane: validatePassword(password, hashpassword: string): Future[bool]	
 newCookie	akane.html#newCookie,ServerRef,string,string,string	akane: newCookie(server: ServerRef; key, value: string; domain = &quot;&quot;): HttpHeaders	
 pages	akane.html#pages.m,ServerRef,untyped	akane: pages(server: ServerRef; body: untyped): untyped	
 Example	akane.html#example	  Example	

@@ -47,21 +47,12 @@ function main() {
 
   toggleSwitch.addEventListener('change', switchTheme, false);
 
+  const currentTheme = localStorage.getItem('theme') ? localStorage.getItem('theme') : null;
+  if (currentTheme) {
+    document.documentElement.setAttribute('data-theme', currentTheme);
 
-  if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-    document.documentElement.setAttribute('data-theme', "dark");
-    toggleSwitch.checked = true;
-  } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
-    document.documentElement.setAttribute('data-theme', "light");
-    toggleSwitch.checked = false;
-  } else {
-    const currentTheme = localStorage.getItem('theme') ? localStorage.getItem('theme') : null;
-    if (currentTheme) {
-      document.documentElement.setAttribute('data-theme', currentTheme);
-
-      if (currentTheme === 'dark') {
-        toggleSwitch.checked = true;
-      }
+    if (currentTheme === 'dark') {
+      toggleSwitch.checked = true;
     }
   }
 }
@@ -83,6 +74,9 @@ function main() {
   </div>
   <div id="global-links">
     <ul class="simple">
+    <li>
+      <a href="theindex.html">Index</a>
+    </li>
     </ul>
   </div>
   <div id="searchInputDiv">
@@ -113,7 +107,7 @@ function main() {
     title="ServerRef = ref object
   port*: uint16
   address*: string
-  server*: AsyncHttpServer"><wbr />Server<wbr />Ref<span class="attachedType"></span></a></li>
+  server*: AsyncHttpServer">ServerRef</a></li>
 
   </ul>
 </li>
@@ -122,27 +116,35 @@ function main() {
   <ul class="simple simple-toc-section">
       <li><a class="reference" href="#AnyHttpMethod"
     title="AnyHttpMethod = [HttpHead, HttpGet, HttpPost, HttpPut, HttpDelete, HttpTrace,
-               HttpOptions, HttpConnect, HttpPatch]"><wbr />Any<wbr />Http<wbr />Method<span class="attachedType"></span></a></li>
+                 HttpOptions, HttpConnect, HttpPatch]">AnyHttpMethod</a></li>
   <li><a class="reference" href="#BaseHttpMethod"
-    title="BaseHttpMethod = [HttpHead, HttpGet, HttpPost, HttpPut, HttpDelete]"><wbr />Base<wbr />Http<wbr />Method<span class="attachedType"></span></a></li>
+    title="BaseHttpMethod = [HttpHead, HttpGet, HttpPost, HttpPut, HttpDelete]">BaseHttpMethod</a></li>
 
   </ul>
 </li>
 <li>
   <a class="reference reference-toplevel" href="#12" id="62">Procs</a>
   <ul class="simple simple-toc-section">
+      <ul class="simple nested-toc-section">newServer
       <li><a class="reference" href="#newServer%2Cstring%2Cuint16"
-    title="newServer(address: string = &quot;127.0.0.1&quot;; port: uint16 = 5000): ServerRef"><wbr />new<wbr />Server<span class="attachedType">ServerRef</span></a></li>
-  <li><a class="reference" href="#loadtemplate%2Cstring%2CJsonNode"
-    title="loadtemplate(name: string; json: JsonNode = %*{}): Future[string]"><wbr />loadtemplate<span class="attachedType"></span></a></li>
-  <li><a class="reference" href="#parseQuery%2CRequest"
-    title="parseQuery(request: Request): Future[JsonNode]"><wbr />parse<wbr />Query<span class="attachedType"></span></a></li>
-  <li><a class="reference" href="#password2hash%2Cstring"
-    title="password2hash(password: string): Future[string]"><wbr />password2hash<span class="attachedType"></span></a></li>
-  <li><a class="reference" href="#validatePassword%2Cstring%2Cstring"
-    title="validatePassword(password, hashpassword: string): Future[bool]"><wbr />validate<wbr />Password<span class="attachedType"></span></a></li>
-  <li><a class="reference" href="#newCookie%2CServerRef%2Cstring%2Cstring%2Cstring"
-    title="newCookie(server: ServerRef; key, value: string; domain = &quot;&quot;): HttpHeaders"><wbr />new<wbr />Cookie<span class="attachedType">ServerRef</span></a></li>
+    title="newServer(address: string = &quot;127.0.0.1&quot;; port: uint16 = 5000): ServerRef">newServer,<wbr>string,<wbr>uint16</a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">parseQuery
+      <li><a class="reference" href="#parseQuery%2CRequest"
+    title="parseQuery(request: Request): Future[JsonNode]">parseQuery,<wbr>Request</a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">loadtemplate
+      <li><a class="reference" href="#loadtemplate%2Cstring%2CJsonNode"
+    title="loadtemplate(name: string; json: JsonNode = %*{}): Future[string]">loadtemplate,<wbr>string,<wbr>JsonNode</a></li>
+
+  </ul>
+  <ul class="simple nested-toc-section">newCookie
+      <li><a class="reference" href="#newCookie%2CServerRef%2Cstring%2Cstring%2Cstring"
+    title="newCookie(server: ServerRef; key, value: string; domain = &quot;&quot;): HttpHeaders">newCookie,<wbr>ServerRef,<wbr>string,<wbr>string,<wbr>string</a></li>
+
+  </ul>
 
   </ul>
 </li>
@@ -150,22 +152,22 @@ function main() {
   <a class="reference reference-toplevel" href="#17" id="67">Macros</a>
   <ul class="simple simple-toc-section">
       <li><a class="reference" href="#pages.m%2CServerRef%2Cuntyped"
-    title="pages(server: ServerRef; body: untyped): untyped"><wbr />pages<span class="attachedType">ServerRef</span></a></li>
+    title="pages(server: ServerRef; body: untyped): untyped">pages</a></li>
   <li><a class="reference" href="#send.m%2Cuntyped%2Cuntyped%2CHttpHeaders"
     title="send(request, message: untyped; http_code = Http200;
-     headers: HttpHeaders = newHttpHeaders()): untyped"><wbr />send<span class="attachedType"></span></a></li>
+     headers: HttpHeaders = newHttpHeaders()): untyped">send</a></li>
   <li><a class="reference" href="#answer.m%2Cuntyped%2Cuntyped%2CHttpHeaders"
     title="answer(request, message: untyped; http_code = Http200;
-       headers: HttpHeaders = newHttpHeaders()): untyped"><wbr />answer<span class="attachedType"></span></a></li>
+       headers: HttpHeaders = newHttpHeaders()): untyped">answer</a></li>
   <li><a class="reference" href="#error.m%2Cuntyped%2Cuntyped%2CHttpHeaders"
     title="error(request, message: untyped; http_code = Http404;
-      headers: HttpHeaders = newHttpHeaders()): untyped"><wbr />error<span class="attachedType"></span></a></li>
+      headers: HttpHeaders = newHttpHeaders()): untyped">error</a></li>
   <li><a class="reference" href="#sendJson.m%2Cuntyped%2Cuntyped"
-    title="sendJson(request, message: untyped; http_code = Http200): untyped"><wbr />send<wbr />Json<span class="attachedType"></span></a></li>
+    title="sendJson(request, message: untyped; http_code = Http200): untyped">sendJson</a></li>
   <li><a class="reference" href="#sendPlaintext.m%2Cuntyped%2Cuntyped"
-    title="sendPlaintext(request, message: untyped; http_code = Http200): untyped"><wbr />send<wbr />Plaintext<span class="attachedType"></span></a></li>
+    title="sendPlaintext(request, message: untyped; http_code = Http200): untyped">sendPlaintext</a></li>
   <li><a class="reference" href="#start.m%2CServerRef"
-    title="start(server: ServerRef): untyped"><wbr />start<span class="attachedType">ServerRef</span></a></li>
+    title="start(server: ServerRef): untyped">start</a></li>
 
   </ul>
 </li>
@@ -207,7 +209,7 @@ function main() {
 <dl class="item">
 <a id="AnyHttpMethod"></a>
 <dt><pre><a href="akane.html#AnyHttpMethod"><span class="Identifier">AnyHttpMethod</span></a> <span class="Other">=</span> <span class="Other">[</span><span class="DecNumber">HttpHead</span><span class="Other">,</span> <span class="DecNumber">HttpGet</span><span class="Other">,</span> <span class="DecNumber">HttpPost</span><span class="Other">,</span> <span class="DecNumber">HttpPut</span><span class="Other">,</span> <span class="DecNumber">HttpDelete</span><span class="Other">,</span> <span class="DecNumber">HttpTrace</span><span class="Other">,</span>
-               <span class="DecNumber">HttpOptions</span><span class="Other">,</span> <span class="DecNumber">HttpConnect</span><span class="Other">,</span> <span class="DecNumber">HttpPatch</span><span class="Other">]</span></pre></dt>
+                 <span class="DecNumber">HttpOptions</span><span class="Other">,</span> <span class="DecNumber">HttpConnect</span><span class="Other">,</span> <span class="DecNumber">HttpPatch</span><span class="Other">]</span></pre></dt>
 <dd>
 
 
@@ -241,7 +243,7 @@ function main() {
 </dd>
 <a id="loadtemplate,string,JsonNode"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#loadtemplate%2Cstring%2CJsonNode"><span class="Identifier">loadtemplate</span></a><span class="Other">(</span><span class="Identifier">name</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">;</span> <span class="Identifier">json</span><span class="Other">:</span> <span class="Identifier">JsonNode</span> <span class="Other">=</span> <span class="Operator">%*</span><span class="Other">{</span><span class="Other">}</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">Future</span><span class="Other">[</span><span class="Identifier">string</span><span class="Other">]</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">inline</span><span class="Other">,</span>
-    <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">FutureError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+    <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 <p>Loads HTML template from <tt class="docutils literal"><span class="pre">templates</span></tt> folder.</p>
@@ -262,7 +264,7 @@ function main() {
 </dd>
 <a id="parseQuery,Request"></a>
 <dt><pre><span class="Keyword">proc</span> <a href="#parseQuery%2CRequest"><span class="Identifier">parseQuery</span></a><span class="Other">(</span><span class="Identifier">request</span><span class="Other">:</span> <span class="Identifier">Request</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">Future</span><span class="Other">[</span><span class="Identifier">JsonNode</span><span class="Other">]</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
-    <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">FutureError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+    <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 Decodes query.<dl class="docutils"><dt>e.g.:</dt>
@@ -272,34 +274,9 @@ Decodes query.<dl class="docutils"><dt>e.g.:</dt>
 
 
 </dd>
-<a id="password2hash,string"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#password2hash%2Cstring"><span class="Identifier">password2hash</span></a><span class="Other">(</span><span class="Identifier">password</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">Future</span><span class="Other">[</span><span class="Identifier">string</span><span class="Other">]</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">inline</span><span class="Other">,</span>
-    <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">FutureError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
-<dd>
-
-<p>Generates a sha1 from <tt class="docutils literal"><span class="pre">password</span></tt>.</p>
-<p>Arguments:</p>
-<ul class="simple"><li><tt class="docutils literal"><span class="pre">password</span></tt> is an user password.</li>
-</ul>
-
-
-</dd>
-<a id="validatePassword,string,string"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#validatePassword%2Cstring%2Cstring"><span class="Identifier">validatePassword</span></a><span class="Other">(</span><span class="Identifier">password</span><span class="Other">,</span> <span class="Identifier">hashpassword</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">Future</span><span class="Other">[</span><span class="Identifier">bool</span><span class="Other">]</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">inline</span><span class="Other">,</span>
-    <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">Exception</span><span class="Other">,</span> <span class="Identifier">ValueError</span><span class="Other">,</span> <span class="Identifier">FutureError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">RootEffect</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
-<dd>
-
-<p>Validates the password and returns true, if the password is valid.</p>
-<p>Arguments:</p>
-<ul class="simple"><li><tt class="docutils literal"><span class="pre">password</span></tt> is a got password from user input.</li>
-<li><tt class="docutils literal"><span class="pre">hashpassword</span></tt> is a response from <a class="reference external" href="#password2hash,string">password2hash proc</a></li>
-</ul>
-
-
-</dd>
 <a id="newCookie,ServerRef,string,string,string"></a>
-<dt><pre><span class="Keyword">proc</span> <a href="#newCookie%2CServerRef%2Cstring%2Cstring%2Cstring"><span class="Identifier">newCookie</span></a><span class="Other">(</span><span class="Identifier">server</span><span class="Other">:</span> <a href="akane.html#ServerRef"><span class="Identifier">ServerRef</span></a><span class="Other">;</span> <span class="Identifier">key</span><span class="Other">,</span> <span class="Identifier">value</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">;</span> <span class="Identifier">domain</span> <span class="Other">=</span> <span class="StringLit">&quot;&quot;</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">HttpHeaders</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma"><span class="Identifier">inline</span><span class="Other">,</span>
-    <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">KeyError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
+<dt><pre><span class="Keyword">proc</span> <a href="#newCookie%2CServerRef%2Cstring%2Cstring%2Cstring"><span class="Identifier">newCookie</span></a><span class="Other">(</span><span class="Identifier">server</span><span class="Other">:</span> <a href="akane.html#ServerRef"><span class="Identifier">ServerRef</span></a><span class="Other">;</span> <span class="Identifier">key</span><span class="Other">,</span> <span class="Identifier">value</span><span class="Other">:</span> <span class="Identifier">string</span><span class="Other">;</span> <span class="Identifier">domain</span> <span class="Other">=</span> <span class="StringLit">&quot;&quot;</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">HttpHeaders</span> <span><span class="Other">{</span><span class="Other pragmadots">...</span><span class="Other">}</span></span><span class="pragmawrap"><span class="Other">{.</span><span class="pragma">
+    <span class="Identifier">inline</span><span class="Other">,</span> <span class="Identifier">raises</span><span class="Other">:</span> <span class="Other">[</span><span class="Identifier">KeyError</span><span class="Other">]</span><span class="Other">,</span> <span class="Identifier">tags</span><span class="Other">:</span> <span class="Other">[</span><span class="Other">]</span></span><span class="Other">.}</span></span></pre></dt>
 <dd>
 
 <p>Creates a new cookies</p>
@@ -342,20 +319,21 @@ Decodes query.<dl class="docutils"><dt>e.g.:</dt>
 <li><tt class="docutils literal"><span class="pre">cookies</span></tt> - StringTable of cookies.</li>
 </ul>
 
-<p><strong class="examples_text">Examples:</strong></p>
-<pre class="listing"><span class="Keyword">let</span> <span class="Identifier">server</span> <span class="Other">=</span> <span class="Identifier">newServer</span><span class="Other">(</span><span class="Other">)</span>
-<span class="Identifier">server</span><span class="Other">.</span><span class="Identifier">pages</span><span class="Other">:</span>
-  <span class="Identifier">equals</span><span class="Other">(</span><span class="StringLit">&quot;/home&quot;</span><span class="Other">)</span><span class="Other">:</span>
-    <span class="Identifier">echo</span> <span class="Identifier">url</span>
-    <span class="Identifier">echo</span> <span class="Identifier">urlParams</span>
-    <span class="Identifier">await</span> <span class="Identifier">request</span><span class="Other">.</span><span class="Identifier">answer</span><span class="Other">(</span><span class="StringLit">&quot;Home&quot;</span><span class="Other">)</span>
-  <span class="StringLit">&quot;/helloworld&quot;</span><span class="Other">:</span>
-    <span class="Identifier">await</span> <span class="Identifier">request</span><span class="Other">.</span><span class="Identifier">answer</span><span class="Other">(</span><span class="StringLit">&quot;Hello, world&quot;</span><span class="Other">)</span></pre>
+<p><strong class="examples_text">Example:</strong></p>
+<pre class="listing"><span class="Keyword">let</span><span class="Whitespace"> </span><span class="Identifier">server</span><span class="Whitespace"> </span><span class="Operator">=</span><span class="Whitespace"> </span><span class="Identifier">newServer</span><span class="Punctuation">(</span><span class="Punctuation">)</span><span class="Whitespace">
+</span><span class="Identifier">server</span><span class="Operator">.</span><span class="Identifier">pages</span><span class="Punctuation">:</span><span class="Whitespace">
+  </span><span class="Identifier">equals</span><span class="Punctuation">(</span><span class="StringLit">&quot;/home&quot;</span><span class="Punctuation">)</span><span class="Punctuation">:</span><span class="Whitespace">
+    </span><span class="Identifier">echo</span><span class="Whitespace"> </span><span class="Identifier">url</span><span class="Whitespace">
+    </span><span class="Identifier">echo</span><span class="Whitespace"> </span><span class="Identifier">urlParams</span><span class="Whitespace">
+    </span><span class="Identifier">await</span><span class="Whitespace"> </span><span class="Identifier">request</span><span class="Operator">.</span><span class="Identifier">answer</span><span class="Punctuation">(</span><span class="StringLit">&quot;Home&quot;</span><span class="Punctuation">)</span><span class="Whitespace">
+  </span><span class="Comment"># You can also not write `equals(&quot;/&quot;)`:</span><span class="Whitespace">
+  </span><span class="StringLit">&quot;/helloworld&quot;</span><span class="Punctuation">:</span><span class="Whitespace">
+    </span><span class="Identifier">await</span><span class="Whitespace"> </span><span class="Identifier">request</span><span class="Operator">.</span><span class="Identifier">answer</span><span class="Punctuation">(</span><span class="StringLit">&quot;Hello, world&quot;</span><span class="Punctuation">)</span></pre>
 
 </dd>
 <a id="send.m,untyped,untyped,HttpHeaders"></a>
 <dt><pre><span class="Keyword">macro</span> <a href="#send.m%2Cuntyped%2Cuntyped%2CHttpHeaders"><span class="Identifier">send</span></a><span class="Other">(</span><span class="Identifier">request</span><span class="Other">,</span> <span class="Identifier">message</span><span class="Other">:</span> <span class="Identifier">untyped</span><span class="Other">;</span> <span class="Identifier">http_code</span> <span class="Other">=</span> <span class="Identifier">Http200</span><span class="Other">;</span>
-          <span class="Identifier">headers</span><span class="Other">:</span> <span class="Identifier">HttpHeaders</span> <span class="Other">=</span> <span class="Identifier">newHttpHeaders</span><span class="Other">(</span><span class="Other">)</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">untyped</span></pre></dt>
+           <span class="Identifier">headers</span><span class="Other">:</span> <span class="Identifier">HttpHeaders</span> <span class="Other">=</span> <span class="Identifier">newHttpHeaders</span><span class="Other">(</span><span class="Other">)</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">untyped</span></pre></dt>
 <dd>
 
 <p>Responds from server with utf-8. Note: Content-length does not send automatically.</p>
@@ -366,7 +344,7 @@ Decodes query.<dl class="docutils"><dt>e.g.:</dt>
 </dd>
 <a id="answer.m,untyped,untyped,HttpHeaders"></a>
 <dt><pre><span class="Keyword">macro</span> <a href="#answer.m%2Cuntyped%2Cuntyped%2CHttpHeaders"><span class="Identifier">answer</span></a><span class="Other">(</span><span class="Identifier">request</span><span class="Other">,</span> <span class="Identifier">message</span><span class="Other">:</span> <span class="Identifier">untyped</span><span class="Other">;</span> <span class="Identifier">http_code</span> <span class="Other">=</span> <span class="Identifier">Http200</span><span class="Other">;</span>
-            <span class="Identifier">headers</span><span class="Other">:</span> <span class="Identifier">HttpHeaders</span> <span class="Other">=</span> <span class="Identifier">newHttpHeaders</span><span class="Other">(</span><span class="Other">)</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">untyped</span></pre></dt>
+             <span class="Identifier">headers</span><span class="Other">:</span> <span class="Identifier">HttpHeaders</span> <span class="Other">=</span> <span class="Identifier">newHttpHeaders</span><span class="Other">(</span><span class="Other">)</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">untyped</span></pre></dt>
 <dd>
 
 <p>Responds from server with utf-8. Note: Content-length does not send automatically.</p>
@@ -377,7 +355,7 @@ Decodes query.<dl class="docutils"><dt>e.g.:</dt>
 </dd>
 <a id="error.m,untyped,untyped,HttpHeaders"></a>
 <dt><pre><span class="Keyword">macro</span> <a href="#error.m%2Cuntyped%2Cuntyped%2CHttpHeaders"><span class="Identifier">error</span></a><span class="Other">(</span><span class="Identifier">request</span><span class="Other">,</span> <span class="Identifier">message</span><span class="Other">:</span> <span class="Identifier">untyped</span><span class="Other">;</span> <span class="Identifier">http_code</span> <span class="Other">=</span> <span class="Identifier">Http404</span><span class="Other">;</span>
-           <span class="Identifier">headers</span><span class="Other">:</span> <span class="Identifier">HttpHeaders</span> <span class="Other">=</span> <span class="Identifier">newHttpHeaders</span><span class="Other">(</span><span class="Other">)</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">untyped</span></pre></dt>
+            <span class="Identifier">headers</span><span class="Other">:</span> <span class="Identifier">HttpHeaders</span> <span class="Other">=</span> <span class="Identifier">newHttpHeaders</span><span class="Other">(</span><span class="Other">)</span><span class="Other">)</span><span class="Other">:</span> <span class="Identifier">untyped</span></pre></dt>
 <dd>
 
 <p>Responds from server with utf-8. Note: Content-length not automatically sends.</p>
@@ -425,7 +403,7 @@ Starts server.
       <div class="twelve-columns footer">
         <span class="nim-sprite"></span>
         <br/>
-        <small style="color: var(--hint);">Made with Nim. Generated: 2020-06-21 09:56:01 UTC</small>
+        <small style="color: var(--hint);">Made with Nim. Generated: 2021-07-05 10:52:38 UTC</small>
       </div>
     </div>
   </div>
