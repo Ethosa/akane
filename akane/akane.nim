@@ -30,7 +30,7 @@ export
 
 when defined(tools):
   import
-    std/sha1,  # sha1 passwords.
+    std/sha1  # sha1 passwords.
 
 
 when defined(debug):
