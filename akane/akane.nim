@@ -14,7 +14,6 @@ import
   tables,
   json,  # urlParams
   uri,  # decodeUrl
-  std/sha1,  # sha1 passwords.
   os,
   re  # regex
 
@@ -28,6 +27,10 @@ export
   json,
   uri,
   re
+
+when defined(tools):
+  import
+    std/sha1,  # sha1 passwords.
 
 
 when defined(debug):
@@ -66,8 +69,15 @@ type
 
 
 const
-  AnyHttpMethod* = [HttpHead, HttpGet, HttpPost, HttpPut, HttpDelete, HttpTrace, HttpOptions, HttpConnect, HttpPatch]
-  BaseHttpMethod* = [HttpHead, HttpGet, HttpPost, HttpPut, HttpDelete]
+  AnyHttpMethod* = [
+    HttpHead, HttpGet, HttpPost, HttpPut,
+    HttpDelete, HttpTrace, HttpOptions,
+    HttpConnect, HttpPatch
+  ]
+  BaseHttpMethod* = [
+    HttpHead, HttpGet, HttpPost,
+    HttpPut, HttpDelete
+  ]
 
 
 # ---------- PRIVATE ---------- #
@@ -122,13 +132,13 @@ proc loadtemplate*(name: string, json: JsonNode = %*{}): Future[string] {.async,
   for key, value in json.pairs:
     # ---- regex patterns ---- #
     let
-      # variable statement, e.g.: $(variable)
+      # variable statement, e.g.: @(variable)
       variable_stmt = re("(@" & key & ")")
-      # if statement, e.g.: if $(variable) {......}
+      # if statement, e.g.: if @(variable) {......}
       if_stmt = re("if\\s*(@" & key & ")\\s*\\{\\s*([\\s\\S]+?)\\s*\\}")
-      # if not statement, e.g.: if not $(variable) {......}
+      # if not statement, e.g.: if not @(variable) {......}
       if_notstmt = re("if\\s*not\\s*(@" & key & ")\\s*\\{\\s*([\\s\\S]+?)\\s*\\}")
-      # for statement, e.g.: for i in 0..$(variable) {hello, $variable[i]}
+      # for statement, e.g.: for i in 0..@(variable) {hello, $variable[i]}
       forstmt = re(
         "for\\s*([\\S]+)\\s*in\\s*(\\d+)\\.\\.(@" & key & ")\\s*\\{\\s*([\\s\\S]+?)\\s*\\}")
     var
@@ -194,25 +204,11 @@ proc parseQuery*(request: Request): Future[JsonNode] {.async.} =
         request.headers["host"] & " "
       else:
         "new "
-    debug(host, request.reqMethod, " Request from ", request.hostname, " to url \"", decodeUrl(request.url.path), "\".")
+    debug(
+      host, request.reqMethod, " Request from ", request.hostname,
+      " to url \"", decodeUrl(request.url.path), "\"."
+    )
     debug(request)
-
-
-proc password2hash*(password: string): Future[string] {.async, inline.} =
-  ## Generates a sha1 from `password`.
-  ##
-  ## Arguments:
-  ## - `password` is an user password.
-  return $secureHash(password)
-
-
-proc validatePassword*(password, hashpassword: string): Future[bool] {.async, inline.} =
-  ## Validates the password and returns true, if the password is valid.
-  ##
-  ## Arguments:
-  ## - `password` is a got password from user input.
-  ## - `hashpassword` is a response from `password2hash proc <#password2hash,string>`_
-  return secureHash(password) == parseSecureHash(hashpassword)
 
 
 proc newCookie*(server: ServerRef, key, value: string, domain = ""): HttpHeaders {.inline.} =
@@ -225,6 +221,27 @@ proc newCookie*(server: ServerRef, key, value: string, domain = ""): HttpHeaders
   let d = if domain != "": domain else: server.address
   return newHttpHeaders([("Set-Cookie", setCookie(key, value, d, noName=true))])
 
+
+# ---------- Other tools ---------- #
+
+when defined(tools):
+  proc password2hash*(password: string): Future[string] {.async, inline.} =
+    ## Generates a sha1 from `password`.
+    ##
+    ## Arguments:
+    ## - `password` is an user password.
+    return $secureHash(password)
+  
+  proc validatePassword*(password, hashpassword: string): Future[bool] {.async, inline.} =
+    ## Validates the password and returns true, if the password is valid.
+    ##
+    ## Arguments:
+    ## - `password` is a got password from user input.
+    ## - `hashpassword` is a response from `password2hash proc <#password2hash,string>`_
+    return secureHash(password) == parseSecureHash(hashpassword)
+
+
+# ---------- Macros ---------- #
 
 macro pages*(server: ServerRef, body: untyped): untyped =
   ## This macro provides convenient page adding.
@@ -342,8 +359,10 @@ macro pages*(server: ServerRef, body: untyped): untyped =
         )
         ifstmtlist.add(  # decoded_url == `path`
           newNimNode(nnkElifBranch).add(
-            newCall("and", newCall("==", path, ident("decoded_url")), newCall("contains", reqmethods, newDotExpr(ident"request", ident"reqMethod"))),
-            slist
+            newCall(
+              "and", newCall("==", path, ident("decoded_url")),
+              newCall("contains", reqmethods, newDotExpr(ident"request", ident"reqMethod"))
+            ), slist
           )
         )
       of "startswith":
@@ -355,10 +374,12 @@ macro pages*(server: ServerRef, body: untyped): untyped =
         )
         ifstmtlist.add(  # decode_url.startsWith(`path`)
           newNimNode(nnkElifBranch).add(
-            newCall("and", newCall("startsWith", ident("decoded_url"), path), newCall("contains", reqmethods, newDotExpr(ident"request", ident"reqMethod"))),
-            slist
-            )
+            newCall(
+              "and", newCall("startsWith", ident("decoded_url"), path),
+              newCall("contains", reqmethods, newDotExpr(ident"request", ident"reqMethod"))
+            ), slist
           )
+        )
       of "endswith":
         slist.insert(0,  # let url: string = decoded_url[0..^`path`.len]
           newLetStmt(
@@ -368,8 +389,10 @@ macro pages*(server: ServerRef, body: untyped): untyped =
         )
         ifstmtlist.add(  # decode_url.endsWith(`path`)
           newNimNode(nnkElifBranch).add(
-            newCall("and", newCall("endsWith", ident("decoded_url"), path), newCall("contains", reqmethods, newDotExpr(ident"request", ident"reqMethod"))),
-            slist
+            newCall(
+              "and", newCall("endsWith", ident("decoded_url"), path),
+              newCall("contains", reqmethods, newDotExpr(ident"request", ident"reqMethod"))
+            ), slist
           )
         )
       of "regex":
@@ -390,8 +413,12 @@ macro pages*(server: ServerRef, body: untyped): untyped =
           ))
         ifstmtlist.add(  # decode_url.match(`path`)
           newNimNode(nnkElifBranch).add(
-            newCall("and", newCall("match", ident("decoded_url"), path), newCall("contains", reqmethods, newDotExpr(ident"request", ident"reqMethod"))),
-            slist))
+            newCall(
+              "and", newCall("match", ident("decoded_url"), path),
+              newCall("contains", reqmethods, newDotExpr(ident"request", ident"reqMethod"))
+            ), slist
+          )
+        )
       of "notfound":
         notfound_declaration = true
         ifstmtlist.add(newNimNode(nnkElse).add(slist))

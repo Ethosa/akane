@@ -1,4 +1,5 @@
 # --- Test 5. password shashing. --- #
+# -- WARNING! Compile with `-d:tools` or `--define:tools`. -- #
 import akane
 
 

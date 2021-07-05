@@ -28,7 +28,7 @@
     import akane
 
     proc main =  # for gcsafe
-      var server = newServer()  # launch on http://localhost:5000
+      var server = newServer()  # by default launches on http://localhost:5000
 
       server.pages:
         equals("/"):  # when url is "http://...localhost:5000/"
@@ -45,6 +45,9 @@
 
 ## Debug mode
 For enable debug mode, please, compile with `-d:debug` or `--define:debug`.
+
+## Tools
+For enable other tools like password checking, please, compile with `-d:tools` or `--define:tools`.
 
 ## FAQ
 *Q*: Where can I learn this?  
