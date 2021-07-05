@@ -7,8 +7,8 @@
 [![License](https://img.shields.io/github/license/Ethosa/akane)](https://github.com/Ethosa/akane/blob/master/LICENSE)
 [![test](https://github.com/Ethosa/akane/workflows/test/badge.svg)](https://github.com/Ethosa/akane/actions)
 
-<h4>Latest version - 0.1.7</h4>
-<h4>Stable version - 0.1.7</h4>
+<h4>Latest version - 0.2.0</h4>
+<h4>Stable version - 0.2.0</h4>
 </div>
 
 ## Install
@@ -62,5 +62,5 @@ For enable other tools like password checking, please, compile with `-d:tools` o
 
 
 <div align="center">
-  Copyright 2020 Ethosa
+  Copyright 2020-2021 Ethosa
 </div>
