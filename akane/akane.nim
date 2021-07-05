@@ -230,6 +230,8 @@ when defined(tools):
     ##
     ## Arguments:
     ## - `password` is an user password.
+    ##
+    ## WARNING! It's works only with `-d:tools`.
     return $secureHash(password)
   
   proc validatePassword*(password, hashpassword: string): Future[bool] {.async, inline.} =
@@ -238,6 +240,8 @@ when defined(tools):
     ## Arguments:
     ## - `password` is a got password from user input.
     ## - `hashpassword` is a response from `password2hash proc <#password2hash,string>`_
+    ##
+    ## WARNING! It's works only with `-d:tools`.
     return secureHash(password) == parseSecureHash(hashpassword)
 
 

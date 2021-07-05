@@ -40,7 +40,7 @@ jobs:
           sudo apt update -yqq
 
       - name: Generate API documents
-        run: nimble doc --index:on --project --out:docs --hints:off akane/akane.nim
+        run: nimble doc --index:on --project --out:docs --hints:off -d:tools akane/akane.nim
 
       - name: Deploy documents
         uses: peaceiris/actions-gh-pages@v3
