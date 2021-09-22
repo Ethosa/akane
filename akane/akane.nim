@@ -246,6 +246,21 @@ when defined(tools):
 
 
 # ---------- Macros ---------- #
+when not declared(nimIdentNormalize):
+  proc nimIdentNormalize(s: string): string =
+    ## Backported from https://github.com/nim-lang/Nim/blob/version-1-4/lib/pure/strutils.nim#L284
+    result = newString(s.len)
+    if s.len > 0:
+      result[0] = s[0]
+    var j = 1
+    for i in 1..len(s) - 1:
+      if s[i] in {'A'..'Z'}:
+        result[j] = chr(ord(s[i]) + (ord('a') - ord('A')))
+        inc j
+      elif s[i] != '_':
+        result[j] = s[i]
+        inc j
+    if j != s.len: setLen(result, j)
 
 macro pages*(server: ServerRef, body: untyped): untyped =
   ## This macro provides convenient page adding.
@@ -356,7 +371,7 @@ macro pages*(server: ServerRef, body: untyped): untyped =
     if (j.kind == nnkCall and
         (path.kind == nnkStrLit or path.kind == nnkCallStrLit or path.kind == nnkEmpty) and
         slist.kind == nnkStmtList):
-      case current
+      case current.nimIdentNormalize()
       of "equals":
         slist.insert(0,  # let url: string = `path`
           newLetStmt(ident("url"), path)
